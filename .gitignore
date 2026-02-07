@@ -1,0 +1,26 @@
+# Build outputs
+build/
+
+# Gradle
+.gradle/
+
+# Kotlin
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+out/
+
+# Local configuration
+local.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+*.tmp
+*.temp
+.cache/
