@@ -1,10 +1,19 @@
 # Build outputs
-/target
+build/
+
+# Gradle
+.gradle/
+
+# Kotlin
+.kotlin/
 
 # IDE
 .idea/
 *.iml
-.vscode/
+out/
+
+# Local configuration
+local.properties
 
 # OS
 .DS_Store
