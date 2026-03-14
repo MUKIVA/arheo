@@ -1,8 +1,10 @@
 package ru.arheo
 
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowDecoration
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.arkivanov.decompose.DefaultComponentContext
@@ -15,8 +17,10 @@ import ru.arheo.feature.report_list.di.reportListModule
 import ru.arheo.feature.report_list.presentation.ReportListComponent
 import ru.arheo.root.DefaultRootComponent
 import ru.arheo.root.RootContent
+import ru.arheo.ui.theme.ArheoTheme
 import javax.swing.SwingUtilities
 
+@OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val koin = startKoin {
         modules(coreModule, reportListModule, reportEditorModule)
@@ -35,14 +39,18 @@ fun main() {
     application {
         Window(
             onCloseRequest = {
+                lifecycle.onPause()
+                lifecycle.onStop()
                 lifecycle.onDestroy()
                 exitApplication()
             },
             title = "Arheo — Управление археологическими отчётами",
             state = rememberWindowState(width = 1200.dp, height = 800.dp),
         ) {
-            MaterialTheme {
-                RootContent(rootComponent)
+            ArheoTheme {
+                Scaffold {
+                    RootContent(rootComponent)
+                }
             }
         }
     }
