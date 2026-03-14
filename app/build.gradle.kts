@@ -25,9 +25,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core)
-            implementation(projects.feature.reportList)
-            implementation(projects.feature.reportEditor)
+            implementation(projects.core.api)
+            implementation(projects.core.impl)
+            implementation(projects.feature.reportList.api)
+            implementation(projects.feature.reportList.impl)
+            implementation(projects.feature.reportEditor.api)
+            implementation(projects.feature.reportEditor.impl)
             implementation(libs.bundles.compose)
             implementation(libs.decompose.extensions.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)

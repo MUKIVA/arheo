@@ -10,7 +10,9 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import org.koin.core.context.startKoin
 import ru.arheo.core.di.coreModule
 import ru.arheo.feature.report_editor.di.reportEditorModule
+import ru.arheo.feature.report_editor.presentation.ReportEditorComponent
 import ru.arheo.feature.report_list.di.reportListModule
+import ru.arheo.feature.report_list.presentation.ReportListComponent
 import ru.arheo.root.DefaultRootComponent
 import ru.arheo.root.RootContent
 import javax.swing.SwingUtilities
@@ -23,7 +25,8 @@ fun main() {
     val rootComponent = runOnUiThread {
         DefaultRootComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
-            koin = koin,
+            reportListFactory = koin.get<ReportListComponent.Factory>(),
+            reportEditorFactory = koin.get<ReportEditorComponent.Factory>(),
         )
     }
     lifecycle.onCreate()

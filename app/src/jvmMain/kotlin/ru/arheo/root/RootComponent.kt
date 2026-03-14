@@ -9,13 +9,8 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
-import org.koin.core.Koin
-import ru.arheo.feature.report_editor.presentation.DefaultReportEditorComponent
 import ru.arheo.feature.report_editor.presentation.ReportEditorComponent
-import ru.arheo.feature.report_editor.presentation.ReportEditorStoreFactory
-import ru.arheo.feature.report_list.presentation.DefaultReportListComponent
 import ru.arheo.feature.report_list.presentation.ReportListComponent
-import ru.arheo.feature.report_list.presentation.ReportListStoreFactory
 
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
@@ -28,7 +23,8 @@ interface RootComponent {
 
 class DefaultRootComponent(
     componentContext: ComponentContext,
-    private val koin: Koin,
+    private val reportListFactory: ReportListComponent.Factory,
+    private val reportEditorFactory: ReportEditorComponent.Factory,
 ) : RootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
@@ -48,16 +44,14 @@ class DefaultRootComponent(
     ): RootComponent.Child =
         when (config) {
             is Config.ReportList -> RootComponent.Child.ReportListChild(
-                DefaultReportListComponent(
+                reportListFactory.create(
                     componentContext = componentContext,
-                    reportListStoreFactory = koin.get<ReportListStoreFactory>(),
                     output = ::onReportListOutput,
                 ),
             )
             is Config.ReportEditor -> RootComponent.Child.ReportEditorChild(
-                DefaultReportEditorComponent(
+                reportEditorFactory.create(
                     componentContext = componentContext,
-                    reportEditorStoreFactory = koin.get<ReportEditorStoreFactory>(),
                     reportId = config.reportId,
                     output = ::onReportEditorOutput,
                 ),
