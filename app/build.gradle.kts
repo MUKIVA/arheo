@@ -49,9 +49,29 @@ compose.desktop {
         mainClass = "$internalPackageName.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Exe, TargetFormat.Dmg)
-            packageName = internalPackageName
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.AppImage,
+                TargetFormat.Exe,
+            )
+            packageName = "Arheo"
             packageVersion = internalVersion
+            description = "Управление археологическими отчётами"
+            vendor = "Arheo"
+            includeAllModules = true
+
+            linux {
+                shortcut = true
+            }
+
+            windows {
+                shortcut = true
+                dirChooser = true
+            }
+
+            macOS {
+                bundleID = internalPackageName
+            }
         }
     }
 }
