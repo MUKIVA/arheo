@@ -9,14 +9,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.api)
-            implementation(projects.feature.reportEditor.api)
-            implementation(projects.feature.reportSelector.api)
+            api(projects.core.api)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
-            implementation(libs.decompose.extensions.compose)
+            implementation(libs.decompose.core)
         }
     }
 }

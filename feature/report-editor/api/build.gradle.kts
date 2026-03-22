@@ -8,6 +8,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core.api)
+            api(projects.feature.reportSelector.api)
         }
     }
 }

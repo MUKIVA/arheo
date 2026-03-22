@@ -14,6 +14,7 @@ import ru.arheo.core.di.coreModule
 import ru.arheo.feature.report_editor.di.reportEditorModule
 import ru.arheo.feature.report_editor.presentation.ReportEditorComponent
 import ru.arheo.feature.report_list.di.reportListModule
+import ru.arheo.feature.report_selector.di.reportSelectorModule
 import ru.arheo.feature.report_list.presentation.ReportListComponent
 import ru.arheo.root.DefaultRootComponent
 import ru.arheo.root.RootContent
@@ -23,7 +24,7 @@ import javax.swing.SwingUtilities
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val koin = startKoin {
-        modules(coreModule, reportListModule, reportEditorModule)
+        modules(coreModule, reportListModule, reportEditorModule, reportSelectorModule)
     }.koin
     val lifecycle = LifecycleRegistry()
     val rootComponent = runOnUiThread {

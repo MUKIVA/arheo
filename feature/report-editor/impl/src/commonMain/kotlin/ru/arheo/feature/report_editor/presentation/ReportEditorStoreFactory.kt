@@ -6,6 +6,7 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
+import ru.arheo.core.data.FileManager
 import ru.arheo.core.data.ReportRepository
 import ru.arheo.core.domain.model.Monument
 import ru.arheo.core.domain.model.Report
@@ -13,6 +14,7 @@ import ru.arheo.core.domain.model.Report
 internal class ReportEditorStoreFactory(
     private val storeFactory: StoreFactory,
     private val repository: ReportRepository,
+    private val fileManager: FileManager,
 ) {
 
     fun create(reportId: Long?): ReportEditorStore {
@@ -74,9 +76,15 @@ internal class ReportEditorStoreFactory(
     private inner class ExecutorImpl :
         CoroutineExecutor<ReportEditorStore.Intent, Action, ReportEditorStore.State, Msg, ReportEditorStore.Label>() {
 
+        private var originalArchivePath: String? = null
+
         override fun executeAction(action: Action) {
             when (action) {
-                is Action.ReportLoaded -> dispatch(Msg.ReportLoaded(action.report))
+                is Action.ReportLoaded -> {
+                    originalArchivePath = action.report.archiveFilePath
+                    dispatch(Msg.ReportLoaded(action.report))
+                    publish(ReportEditorStore.Label.ArchivePathLoaded(action.report.archiveFilePath))
+                }
                 is Action.SuggestionsLoaded -> dispatch(Msg.SuggestionsLoaded(action.authors, action.workTypes))
             }
         }
@@ -92,11 +100,11 @@ internal class ReportEditorStoreFactory(
                 is ReportEditorStore.Intent.UpdateMonument -> dispatch(Msg.MonumentUpdated(intent.index, intent.monument))
                 is ReportEditorStore.Intent.AddMonument -> dispatch(Msg.MonumentAdded)
                 is ReportEditorStore.Intent.RemoveMonument -> dispatch(Msg.MonumentRemoved(intent.index))
-                is ReportEditorStore.Intent.Save -> handleSave()
+                is ReportEditorStore.Intent.Save -> handleSave(intent.workingDirectory, intent.hasFiles)
             }
         }
 
-        private fun handleSave() {
+        private fun handleSave(workingDirectory: String, hasFiles: Boolean) {
             val currentState = state()
             val yearInt = currentState.year.toIntOrNull()
             if (currentState.title.isBlank()) {
@@ -113,23 +121,47 @@ internal class ReportEditorStoreFactory(
             }
             dispatch(Msg.Saving)
             scope.launch {
-                val report = Report(
-                    id = currentState.reportId ?: 0L,
-                    title = currentState.title.trim(),
-                    year = yearInt,
-                    authors = currentState.authors.split(",").map { it.trim() }.filter { it.isNotBlank() },
-                    workType = currentState.workType.trim(),
-                    districts = currentState.districts.split(",").map { it.trim() }.filter { it.isNotBlank() },
-                    keywords = currentState.keywords.split(",").map { it.trim() }.filter { it.isNotBlank() },
-                    monuments = currentState.monuments.filter { it.name.isNotBlank() },
-                )
+                val report = buildReport(currentState, yearInt)
+                val archivePath = archiveIfNeeded(workingDirectory, hasFiles, report)
+                deleteStaleArchive(archivePath)
+                val savedReport = report.copy(archiveFilePath = archivePath)
                 if (currentState.isEditing) {
-                    repository.updateReport(report)
+                    repository.updateReport(savedReport)
                 } else {
-                    repository.addReport(report)
+                    repository.addReport(savedReport)
                 }
+                fileManager.cleanupWorkingDirectory(workingDirectory)
                 dispatch(Msg.Saved)
                 publish(ReportEditorStore.Label.Saved)
+            }
+        }
+
+        private fun buildReport(state: ReportEditorStore.State, year: Int): Report =
+            Report(
+                id = state.reportId ?: 0L,
+                title = state.title.trim(),
+                year = year,
+                authors = state.authors.split(",").map { it.trim() }.filter { it.isNotBlank() },
+                workType = state.workType.trim(),
+                districts = state.districts.split(",").map { it.trim() }.filter { it.isNotBlank() },
+                keywords = state.keywords.split(",").map { it.trim() }.filter { it.isNotBlank() },
+                monuments = state.monuments.filter { it.name.isNotBlank() },
+            )
+
+        private suspend fun archiveIfNeeded(
+            workingDirectory: String,
+            hasFiles: Boolean,
+            report: Report,
+        ): String? {
+            if (!hasFiles) return null
+            val archiveName = fileManager.computeArchiveName(report)
+            return fileManager.archiveWorkingDirectory(workingDirectory, archiveName)
+        }
+
+        private suspend fun deleteStaleArchive(newArchivePath: String?) {
+            val oldPath = originalArchivePath ?: return
+            if (oldPath != newArchivePath) {
+                fileManager.deleteArchive(oldPath)
             }
         }
     }

@@ -15,7 +15,7 @@ interface ReportEditorStore : Store<ReportEditorStore.Intent, ReportEditorStore.
         data class UpdateMonument(val index: Int, val monument: Monument) : Intent
         data object AddMonument : Intent
         data class RemoveMonument(val index: Int) : Intent
-        data object Save : Intent
+        data class Save(val workingDirectory: String, val hasFiles: Boolean) : Intent
     }
 
     data class State(
@@ -38,5 +38,6 @@ interface ReportEditorStore : Store<ReportEditorStore.Intent, ReportEditorStore.
 
     sealed interface Label {
         data object Saved : Label
+        data class ArchivePathLoaded(val archivePath: String?) : Label
     }
 }

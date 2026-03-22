@@ -31,6 +31,8 @@ kotlin {
             implementation(projects.feature.reportList.impl)
             implementation(projects.feature.reportEditor.api)
             implementation(projects.feature.reportEditor.impl)
+            implementation(projects.feature.reportSelector.api)
+            implementation(projects.feature.reportSelector.impl)
             implementation(libs.bundles.compose)
             implementation(libs.decompose.extensions.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
@@ -59,6 +61,7 @@ compose.desktop {
             description = "Управление археологическими отчётами"
             vendor = "Arheo"
             includeAllModules = true
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
             linux {
                 shortcut = true

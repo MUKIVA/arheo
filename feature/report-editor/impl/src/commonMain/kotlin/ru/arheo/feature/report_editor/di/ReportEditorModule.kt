@@ -5,15 +5,17 @@ import org.koin.dsl.module
 import ru.arheo.feature.report_editor.presentation.DefaultReportEditorComponent
 import ru.arheo.feature.report_editor.presentation.ReportEditorComponent
 import ru.arheo.feature.report_editor.presentation.ReportEditorStoreFactory
+import ru.arheo.feature.report_selector.presentation.ReportSelectorComponent
 
 private const val REPORT_EDITOR_SCOPE = "ReportEditorScope"
 
 val reportEditorModule = module {
     scope(named(REPORT_EDITOR_SCOPE)) {
-        scoped { ReportEditorStoreFactory(get(), get()) }
+        scoped { ReportEditorStoreFactory(get(), get(), get()) }
     }
     factory<ReportEditorComponent.Factory> {
         val koin = getKoin()
+        val selectorFactory = koin.get<ReportSelectorComponent.Factory>()
         ReportEditorComponent.Factory { componentContext, reportId, output ->
             val scope = koin.createScope(
                 "ReportEditor@${componentContext.hashCode()}",
@@ -22,6 +24,7 @@ val reportEditorModule = module {
             DefaultReportEditorComponent(
                 componentContext = componentContext,
                 reportEditorStoreFactory = scope.get(),
+                selectorFactory = selectorFactory,
                 reportId = reportId,
                 output = output,
                 koinScope = scope,

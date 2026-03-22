@@ -14,10 +14,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 import ru.arheo.core.domain.model.Monument
 import ru.arheo.core.util.getStore
+import ru.arheo.feature.report_selector.presentation.ReportSelectorComponent
 
 internal class DefaultReportEditorComponent(
     componentContext: ComponentContext,
     private val reportEditorStoreFactory: ReportEditorStoreFactory,
+    selectorFactory: ReportSelectorComponent.Factory,
     reportId: Long?,
     private val output: (ReportEditorComponent.Output) -> Unit,
     private val koinScope: Scope,
@@ -29,6 +31,9 @@ internal class DefaultReportEditorComponent(
         instanceKeeper.getStore("ReportEditorStore") {
             reportEditorStoreFactory.create(reportId)
         }
+
+    override val selectorComponent: ReportSelectorComponent =
+        selectorFactory.create(componentContext)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val state: StateFlow<ReportEditorStore.State> = store.stateFlow
@@ -43,6 +48,9 @@ internal class DefaultReportEditorComponent(
             store.labels.collect { label ->
                 when (label) {
                     is ReportEditorStore.Label.Saved -> output(ReportEditorComponent.Output.Saved)
+                    is ReportEditorStore.Label.ArchivePathLoaded -> {
+                        label.archivePath?.let { selectorComponent.loadArchive(it) }
+                    }
                 }
             }
         }
@@ -85,7 +93,13 @@ internal class DefaultReportEditorComponent(
     }
 
     override fun onSave() {
-        store.accept(ReportEditorStore.Intent.Save)
+        val selectorState = selectorComponent.state.value
+        store.accept(
+            ReportEditorStore.Intent.Save(
+                workingDirectory = selectorState.workingDirectory,
+                hasFiles = selectorState.hasFiles,
+            )
+        )
     }
 
     override fun onCancel() {

@@ -3,10 +3,12 @@ package ru.arheo.feature.report_editor.presentation
 import com.arkivanov.decompose.ComponentContext
 import kotlinx.coroutines.flow.StateFlow
 import ru.arheo.core.domain.model.Monument
+import ru.arheo.feature.report_selector.presentation.ReportSelectorComponent
 
 interface ReportEditorComponent {
 
     val state: StateFlow<ReportEditorStore.State>
+    val selectorComponent: ReportSelectorComponent
 
     fun onTitleChanged(title: String)
     fun onYearChanged(year: String)

@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.arheo.core.domain.model.Monument
 import ru.arheo.feature.report_editor.presentation.ReportEditorComponent
+import ru.arheo.feature.report_editor.presentation.ReportEditorStore
+import ru.arheo.feature.report_selector.ui.ReportSelectorContent
 
 @Composable
 fun ReportEditorContent(component: ReportEditorComponent) {
@@ -57,85 +59,113 @@ fun ReportEditorContent(component: ReportEditorComponent) {
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
-        OutlinedTextField(
-            value = state.title,
-            onValueChange = component::onTitleChanged,
-            label = { Text("Название отчёта *") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = state.year,
-                onValueChange = component::onYearChanged,
-                label = { Text("Год *") },
-                singleLine = true,
-                modifier = Modifier.width(120.dp),
-            )
-            OutlinedTextField(
-                value = state.authors,
-                onValueChange = component::onAuthorsChanged,
-                label = { Text("Авторы * (через запятую)") },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = state.workType,
-                onValueChange = component::onWorkTypeChanged,
-                label = { Text("Тип работ") },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            OutlinedTextField(
-                value = state.districts,
-                onValueChange = component::onDistrictsChanged,
-                label = { Text("Районы (через запятую)") },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = state.keywords,
-            onValueChange = component::onKeywordsChanged,
-            label = { Text("Ключевые слова (через запятую)") },
-            minLines = 2,
-            maxLines = 4,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        MetadataSection(state, component)
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Памятники", style = MaterialTheme.typography.titleMedium)
+        MonumentsSection(state.monuments, component)
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
         Spacer(modifier = Modifier.height(8.dp))
-        state.monuments.forEachIndexed { index, monument ->
-            MonumentRow(
-                monument = monument,
-                onUpdate = { component.onUpdateMonument(index, it) },
-                onRemove = { component.onRemoveMonument(index) },
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-        }
-        OutlinedButton(onClick = component::onAddMonument) {
-            Text("+ Добавить памятник")
-        }
+        ReportSelectorContent(component.selectorComponent)
         Spacer(modifier = Modifier.height(24.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(
-                onClick = component::onSave,
-                enabled = !state.isSaving,
-            ) {
-                Text(if (state.isSaving) "Сохранение..." else "Сохранить")
-            }
-            OutlinedButton(onClick = component::onCancel) {
-                Text("Отмена")
-            }
+        ActionButtons(state.isSaving, component)
+    }
+}
+
+@Composable
+private fun MetadataSection(
+    state: ReportEditorStore.State,
+    component: ReportEditorComponent,
+) {
+    OutlinedTextField(
+        value = state.title,
+        onValueChange = component::onTitleChanged,
+        label = { Text("Название отчёта *") },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = state.year,
+            onValueChange = component::onYearChanged,
+            label = { Text("Год *") },
+            singleLine = true,
+            modifier = Modifier.width(120.dp),
+        )
+        OutlinedTextField(
+            value = state.authors,
+            onValueChange = component::onAuthorsChanged,
+            label = { Text("Авторы * (через запятую)") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = state.workType,
+            onValueChange = component::onWorkTypeChanged,
+            label = { Text("Тип работ") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+        OutlinedTextField(
+            value = state.districts,
+            onValueChange = component::onDistrictsChanged,
+            label = { Text("Районы (через запятую)") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    OutlinedTextField(
+        value = state.keywords,
+        onValueChange = component::onKeywordsChanged,
+        label = { Text("Ключевые слова (через запятую)") },
+        minLines = 2,
+        maxLines = 4,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun MonumentsSection(
+    monuments: List<Monument>,
+    component: ReportEditorComponent,
+) {
+    Text(text = "Памятники", style = MaterialTheme.typography.titleMedium)
+    Spacer(modifier = Modifier.height(8.dp))
+    monuments.forEachIndexed { index, monument ->
+        MonumentRow(
+            monument = monument,
+            onUpdate = { component.onUpdateMonument(index, it) },
+            onRemove = { component.onRemoveMonument(index) },
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+    OutlinedButton(onClick = component::onAddMonument) {
+        Text("+ Добавить памятник")
+    }
+}
+
+@Composable
+private fun ActionButtons(
+    isSaving: Boolean,
+    component: ReportEditorComponent,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Button(
+            onClick = component::onSave,
+            enabled = !isSaving,
+        ) {
+            Text(if (isSaving) "Сохранение..." else "Сохранить")
+        }
+        OutlinedButton(onClick = component::onCancel) {
+            Text("Отмена")
         }
     }
 }
