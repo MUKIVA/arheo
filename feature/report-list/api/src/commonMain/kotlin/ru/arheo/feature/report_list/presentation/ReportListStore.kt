@@ -6,6 +6,7 @@ import ru.arheo.core.domain.model.Report
 interface ReportListStore : Store<ReportListStore.Intent, ReportListStore.State, ReportListStore.Label> {
 
     sealed interface Intent {
+        data object Refresh : Intent
         data class UpdateSearchQuery(val query: String) : Intent
         data class RequestDeleteReport(val reportId: Long) : Intent
         data object ConfirmDeleteReport : Intent

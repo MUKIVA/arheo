@@ -16,7 +16,10 @@ internal class DefaultReportListComponent(
 ) : ReportListComponent, ComponentContext by componentContext {
 
     init {
-        lifecycle.subscribe(onDestroy = { koinScope.close() })
+        lifecycle.subscribe(
+            onResume = { store.accept(ReportListStore.Intent.Refresh) },
+            onDestroy = { koinScope.close() },
+        )
     }
 
     private val store: ReportListStore =

@@ -58,10 +58,18 @@ internal class ReportListStoreFactory(
 
         override fun executeIntent(intent: ReportListStore.Intent) {
             when (intent) {
+                is ReportListStore.Intent.Refresh -> handleRefresh()
                 is ReportListStore.Intent.UpdateSearchQuery -> handleSearch(intent.query)
                 is ReportListStore.Intent.RequestDeleteReport -> dispatch(Msg.RequestDelete(intent.reportId))
                 is ReportListStore.Intent.ConfirmDeleteReport -> handleConfirmDelete()
                 is ReportListStore.Intent.DismissDeleteReport -> dispatch(Msg.DismissDelete)
+            }
+        }
+
+        private fun handleRefresh() {
+            scope.launch {
+                val reports = repository.searchReports(state().searchQuery)
+                dispatch(Msg.ReportsLoaded(reports))
             }
         }
 
