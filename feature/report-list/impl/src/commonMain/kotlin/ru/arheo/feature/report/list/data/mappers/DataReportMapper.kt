@@ -1,11 +1,11 @@
 package ru.arheo.feature.report.list.data.mappers
 
-import ru.arheo.core.domain.model.DataReport
+import ru.arheo.core.domain.model.ReportData
 import ru.arheo.feature.report.list.domain.models.Report
 
 @JvmInline
 internal value class DataReportMapper(
-    private val data: DataReport
+    private val data: ReportData
 ) {
     fun toReport(): Report {
         return Report(

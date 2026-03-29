@@ -1,9 +1,9 @@
 package ru.arheo.feature.report.list.data.mappers
 
-import ru.arheo.core.domain.model.DataReport
+import ru.arheo.core.domain.model.ReportData
 
 internal object Mapper {
-    fun from(data: DataReport): DataReportMapper {
+    fun from(data: ReportData): DataReportMapper {
         return DataReportMapper(data)
     }
 }

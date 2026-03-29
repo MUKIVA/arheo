@@ -1,13 +1,13 @@
 package ru.arheo.core.data
 
-import ru.arheo.core.domain.model.DataReport
+import ru.arheo.core.domain.model.ReportData
 
 interface ReportSource {
-    suspend fun getAllReports(): List<DataReport>
-    suspend fun getReportById(id: Long): DataReport?
-    suspend fun searchReports(query: String): List<DataReport>
-    suspend fun addReport(report: DataReport): DataReport
-    suspend fun updateReport(report: DataReport)
+    suspend fun getAllReports(): List<ReportData>
+    suspend fun getReportById(id: Long): ReportData?
+    suspend fun searchReports(query: String): List<ReportData>
+    suspend fun addReport(report: ReportData): ReportData
+    suspend fun updateReport(report: ReportData)
     suspend fun deleteReport(id: Long)
     suspend fun getAllAuthors(): List<String>
     suspend fun getAllWorkTypes(): List<String>

@@ -13,6 +13,4 @@ internal interface ReportListComponent {
     fun onConfirmDeleteReport()
     fun onDismissDeleteReport()
 
-
-
 }

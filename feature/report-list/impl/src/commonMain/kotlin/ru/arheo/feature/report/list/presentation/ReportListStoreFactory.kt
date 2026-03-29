@@ -11,7 +11,7 @@ internal class ReportListStoreFactory(
     fun create(): ReportListStore {
         return ReportListStore(
             implementation = storeFactory.create(
-                name = REPORT_LIST_STORE_NAME,
+                name = STORE_NAME,
                 initialState = ReportListStore.State.Loading,
                 bootstrapper = ReportListBootstrapper(repository),
                 executorFactory = { ReportListExecutor(repository) },
@@ -21,7 +21,7 @@ internal class ReportListStoreFactory(
     }
 
     private companion object {
-        const val REPORT_LIST_STORE_NAME = "ReportListStore"
+        const val STORE_NAME = "ReportListStore"
     }
 }
 

@@ -3,7 +3,7 @@ package ru.arheo.core.domain.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DataReport(
+data class ReportData(
     val id: Long = 0L,
     val title: String = "",
     val year: Int = 0,

@@ -21,7 +21,7 @@ import ru.arheo.core.db.ReportDistrictTable
 import ru.arheo.core.db.ReportKeywordTable
 import ru.arheo.core.db.ReportTable
 import ru.arheo.core.domain.model.Monument
-import ru.arheo.core.domain.model.DataReport
+import ru.arheo.core.domain.model.ReportData
 
 internal class DbReportSource(
     private val database: Database,
@@ -29,15 +29,15 @@ internal class DbReportSource(
     private suspend fun <T> dbQuery(block: () -> T): T =
         withContext(Dispatchers.IO) { transaction(database) { block() } }
 
-    override suspend fun getAllReports(): List<DataReport> = dbQuery {
+    override suspend fun getAllReports(): List<ReportData> = dbQuery {
         loadAllReports()
     }
 
-    override suspend fun getReportById(id: Long): DataReport? = dbQuery {
+    override suspend fun getReportById(id: Long): ReportData? = dbQuery {
         loadReportById(id)
     }
 
-    override suspend fun searchReports(query: String): List<DataReport> = dbQuery {
+    override suspend fun searchReports(query: String): List<ReportData> = dbQuery {
         if (query.isBlank()) return@dbQuery loadAllReports()
         val searchTerm = query.lowercase()
         val pattern = "%$searchTerm%"
@@ -47,7 +47,7 @@ internal class DbReportSource(
             .sortedByDescending { it.year }
     }
 
-    override suspend fun addReport(report: DataReport): DataReport = dbQuery {
+    override suspend fun addReport(report: ReportData): ReportData = dbQuery {
         val reportId = ReportTable.insertAndGetId {
             it[title] = report.title
             it[year] = report.year
@@ -59,7 +59,7 @@ internal class DbReportSource(
         loadReportById(reportId)!!
     }
 
-    override suspend fun updateReport(report: DataReport): Unit = dbQuery {
+    override suspend fun updateReport(report: ReportData): Unit = dbQuery {
         ReportTable.update({ ReportTable.id eq report.id }) {
             it[title] = report.title
             it[year] = report.year
@@ -109,13 +109,13 @@ internal class DbReportSource(
             .sorted()
     }
 
-    private fun loadAllReports(): List<DataReport> =
+    private fun loadAllReports(): List<ReportData> =
         ReportTable
             .selectAll()
             .orderBy(ReportTable.year to SortOrder.DESC)
             .map { row -> buildReport(row) }
 
-    private fun loadReportById(id: Long): DataReport? {
+    private fun loadReportById(id: Long): ReportData? {
         val row = ReportTable
             .selectAll()
             .where { ReportTable.id eq id }
@@ -123,9 +123,9 @@ internal class DbReportSource(
         return buildReport(row)
     }
 
-    private fun buildReport(row: ResultRow): DataReport {
+    private fun buildReport(row: ResultRow): ReportData {
         val reportId = row[ReportTable.id].value
-        return DataReport(
+        return ReportData(
             id = reportId,
             title = row[ReportTable.title],
             year = row[ReportTable.year],
@@ -199,7 +199,7 @@ internal class DbReportSource(
         return ids
     }
 
-    private fun insertRelatedData(reportId: Long, report: DataReport) {
+    private fun insertRelatedData(reportId: Long, report: ReportData) {
         report.authors.forEach { author ->
             ReportAuthorTable.insert {
                 it[ReportAuthorTable.reportId] = reportId

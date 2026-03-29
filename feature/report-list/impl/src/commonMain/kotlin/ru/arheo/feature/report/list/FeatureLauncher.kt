@@ -3,6 +3,7 @@ package ru.arheo.feature.report.list
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
@@ -36,9 +37,11 @@ fun launchReportListContent(
     }
     val module = remember { createFeatureModule(deps) }
 
-    loadKoinModules(
-        modules = listOf(module)
-    )
+    LaunchedEffect(Unit) {
+        loadKoinModules(
+            modules = listOf(module)
+        )
+    }
 
     CompositionLocalProvider(
         LocalKoinScope provides ComposeContextWrapper(scope)

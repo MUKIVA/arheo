@@ -6,15 +6,15 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
-import ru.arheo.core.data.FileManager
+import ru.arheo.core.data.FileSource
 import ru.arheo.core.data.ReportSource
 import ru.arheo.core.domain.model.Monument
-import ru.arheo.core.domain.model.DataReport
+import ru.arheo.core.domain.model.ReportData
 
 internal class ReportEditorStoreFactory(
     private val storeFactory: StoreFactory,
     private val repository: ReportSource,
-    private val fileManager: FileManager,
+    private val fileSource: FileSource,
 ) {
 
     fun create(reportId: Long?): ReportEditorStore {
@@ -32,12 +32,12 @@ internal class ReportEditorStoreFactory(
     }
 
     private sealed interface Action {
-        data class ReportLoaded(val report: DataReport) : Action
+        data class ReportLoaded(val report: ReportData) : Action
         data class SuggestionsLoaded(val authors: List<String>, val workTypes: List<String>) : Action
     }
 
     private sealed interface Msg {
-        data class ReportLoaded(val report: DataReport) : Msg
+        data class ReportLoaded(val report: ReportData) : Msg
         data class SuggestionsLoaded(val authors: List<String>, val workTypes: List<String>) : Msg
         data class TitleChanged(val title: String) : Msg
         data class YearChanged(val year: String) : Msg
@@ -130,14 +130,14 @@ internal class ReportEditorStoreFactory(
                 } else {
                     repository.addReport(savedReport)
                 }
-                fileManager.cleanupWorkingDirectory(workingDirectory)
+                fileSource.cleanupWorkingDirectory(workingDirectory)
                 dispatch(Msg.Saved)
                 publish(ReportEditorStore.Label.Saved)
             }
         }
 
-        private fun buildReport(state: ReportEditorStore.State, year: Int): DataReport =
-            DataReport(
+        private fun buildReport(state: ReportEditorStore.State, year: Int): ReportData =
+            ReportData(
                 id = state.reportId ?: 0L,
                 title = state.title.trim(),
                 year = year,
@@ -151,17 +151,17 @@ internal class ReportEditorStoreFactory(
         private suspend fun archiveIfNeeded(
             workingDirectory: String,
             hasFiles: Boolean,
-            report: DataReport,
+            report: ReportData,
         ): String? {
             if (!hasFiles) return null
-            val archiveName = fileManager.computeArchiveName(report)
-            return fileManager.archiveWorkingDirectory(workingDirectory, archiveName)
+            val archiveName = fileSource.computeArchiveName(report)
+            return fileSource.archiveWorkingDirectory(workingDirectory, archiveName)
         }
 
         private suspend fun deleteStaleArchive(newArchivePath: String?) {
             val oldPath = originalArchivePath ?: return
             if (oldPath != newArchivePath) {
-                fileManager.deleteArchive(oldPath)
+                fileSource.deleteArchive(oldPath)
             }
         }
     }

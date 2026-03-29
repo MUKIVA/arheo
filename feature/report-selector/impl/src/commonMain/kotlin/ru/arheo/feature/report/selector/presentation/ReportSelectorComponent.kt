@@ -1,8 +1,7 @@
-package ru.arheo.feature.report_selector.presentation
+package ru.arheo.feature.report.selector.presentation
 
-import com.arkivanov.decompose.ComponentContext
 import kotlinx.coroutines.flow.StateFlow
-import ru.arheo.core.domain.model.FileInfo
+import ru.arheo.core.domain.model.FileInfoData
 
 interface ReportSelectorComponent {
 
@@ -14,7 +13,7 @@ interface ReportSelectorComponent {
     fun loadArchive(archivePath: String)
 
     data class State(
-        val attachedFiles: List<FileInfo> = emptyList(),
+        val attachedFiles: List<FileInfoData> = emptyList(),
         val isDraggingOver: Boolean = false,
         val workingDirectory: String = "",
         val isLoading: Boolean = false,
@@ -22,7 +21,4 @@ interface ReportSelectorComponent {
         val hasFiles: Boolean get() = attachedFiles.isNotEmpty()
     }
 
-    fun interface Factory {
-        fun create(componentContext: ComponentContext): ReportSelectorComponent
-    }
 }

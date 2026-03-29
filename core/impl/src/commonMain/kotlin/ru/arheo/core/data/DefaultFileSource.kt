@@ -2,8 +2,8 @@ package ru.arheo.core.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ru.arheo.core.domain.model.FileInfo
-import ru.arheo.core.domain.model.DataReport
+import ru.arheo.core.domain.model.FileInfoData
+import ru.arheo.core.domain.model.ReportData
 import ru.arheo.core.data.util.AppPaths
 import java.nio.file.Files
 import java.nio.file.Path
@@ -12,7 +12,7 @@ import java.security.MessageDigest
 import java.util.Comparator
 import java.util.UUID
 
-internal class DefaultFileManager : FileManager {
+internal class DefaultFileSource : FileSource {
 
     private val isWindows: Boolean =
         System.getProperty("os.name").lowercase().contains("win")
@@ -38,7 +38,7 @@ internal class DefaultFileManager : FileManager {
         }
     }
 
-    override suspend fun listWorkingFiles(workingDir: String): List<FileInfo> = withContext(Dispatchers.IO) {
+    override suspend fun listWorkingFiles(workingDir: String): List<FileInfoData> = withContext(Dispatchers.IO) {
         val dir = Path.of(workingDir)
         if (!Files.exists(dir)) return@withContext emptyList()
         Files.list(dir).use { stream ->
@@ -83,7 +83,7 @@ internal class DefaultFileManager : FileManager {
         Files.deleteIfExists(Path.of(archivePath))
     }
 
-    override fun computeArchiveName(report: DataReport): String {
+    override fun computeArchiveName(report: ReportData): String {
         val content = buildString {
             append(report.title)
             append("|").append(report.year)
@@ -118,8 +118,8 @@ internal class DefaultFileManager : FileManager {
         }
     }
 
-    private fun buildFileInfo(path: Path): FileInfo =
-        FileInfo(
+    private fun buildFileInfo(path: Path): FileInfoData =
+        FileInfoData(
             name = path.fileName.toString(),
             absolutePath = path.toString(),
             size = if (Files.isDirectory(path)) computeDirectorySize(path) else Files.size(path),
