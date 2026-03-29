@@ -17,7 +17,13 @@ internal fun createFeatureModule(
         scoped { DefaultReportRepository(get()) }
             .bind<ReportRepository>()
         scoped { ReportListStoreFactory(get(), get()) }
-        scoped { DefaultReportListComponent(get(), get()) }
-            .bind<ReportListComponent>()
+        scoped {
+            DefaultReportListComponent(
+                componentContext = get(),
+                reportListStoreFactory = get(),
+                navigateCreateReport = deps.navigateCreateReport,
+                navigateEditReport = deps.navigateEditReport
+            )
+        }.bind<ReportListComponent>()
     }
 }

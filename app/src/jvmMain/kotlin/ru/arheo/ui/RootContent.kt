@@ -24,6 +24,8 @@ fun RootContent(
         when (val instance = child.instance) {
             is RootComponent.Child.ReportList -> launchReportListContent(
                 componentContext = instance.componentContext,
+                onCreateReport = instance.navigateCreateReport,
+                onEditReport = instance.navigateEditReport,
                 modifier = Modifier.fillMaxSize()
             )
             is RootComponent.Child.ReportEditor -> Box(Modifier.fillMaxSize())

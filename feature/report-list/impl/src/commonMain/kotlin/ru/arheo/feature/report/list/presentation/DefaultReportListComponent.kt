@@ -9,6 +9,8 @@ import ru.arheo.core.util.getStore
 internal class DefaultReportListComponent(
     componentContext: ComponentContext,
     private val reportListStoreFactory: ReportListStoreFactory,
+    private val navigateCreateReport: () -> Unit,
+    private val navigateEditReport: (Long) -> Unit
 ) : ReportListComponent, ComponentContext by componentContext {
 
     init {
@@ -31,11 +33,11 @@ internal class DefaultReportListComponent(
     }
 
     override fun onEditReport(reportId: Long) {
-//        output(ReportListComponent.Output.EditReport(reportId))
+        navigateEditReport(reportId)
     }
 
     override fun onCreateReport() {
-//        output(ReportListComponent.Output.CreateReport)
+        navigateCreateReport()
     }
 
     override fun onRequestDeleteReport(reportId: Long) {

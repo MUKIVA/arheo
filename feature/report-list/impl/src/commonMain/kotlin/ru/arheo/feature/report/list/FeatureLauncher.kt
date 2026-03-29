@@ -22,10 +22,18 @@ import ru.arheo.feature.report.list.ui.ReportListRoot
 @Composable
 fun launchReportListContent(
     componentContext: ComponentContext,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEditReport: (Long) -> Unit = {},
+    onCreateReport: () -> Unit = {}
 ) {
     val scope = rememberKoinScope(FeatureScope().scope)
-    val deps = remember { FeatureDependencies(componentContext) }
+    val deps = remember(componentContext, onEditReport, onCreateReport) {
+        FeatureDependencies(
+            componentContext = componentContext,
+            navigateCreateReport = onCreateReport,
+            navigateEditReport = onEditReport
+        )
+    }
     val module = remember { createFeatureModule(deps) }
 
     loadKoinModules(

@@ -1,9 +1,11 @@
 package ru.arheo.navigation
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.DelicateDecomposeApi
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
 
@@ -22,21 +24,23 @@ class DefaultRootComponent(
             childFactory = ::createChild,
         )
 
+    @OptIn(DelicateDecomposeApi::class)
     private fun createChild(
         config: Config,
         componentContext: ComponentContext,
     ): RootComponent.Child = when (config) {
-        is Config.ReportList -> RootComponent.Child.ReportList(componentContext)
+        is Config.ReportList -> RootComponent.Child.ReportList(
+            componentContext = componentContext,
+            navigateCreateReport = {
+                navigation.push(Config.ReportEditor(null))
+            },
+            navigateEditReport = { reportId ->
+                navigation.push(Config.ReportEditor(reportId))
+            }
+
+        )
         is Config.ReportEditor -> RootComponent.Child.ReportEditor(componentContext)
     }
-
-//    @OptIn(DelicateDecomposeApi::class)
-//    private fun onReportListOutput(output: ReportListComponent.Output) {
-//        when (output) {
-//            is ReportListComponent.Output.CreateReport -> navigation.push(Config.ReportEditor(reportId = null))
-//            is ReportListComponent.Output.EditReport -> navigation.push(Config.ReportEditor(reportId = output.reportId))
-//        }
-//    }
 
 //    private fun onReportEditorOutput(output: ReportEditorComponent.Output) {
 //        when (output) {

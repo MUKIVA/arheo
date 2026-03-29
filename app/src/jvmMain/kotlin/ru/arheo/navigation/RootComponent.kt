@@ -8,7 +8,11 @@ interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
 
     sealed class Child {
-        data class ReportList(val componentContext: ComponentContext) : Child()
+        data class ReportList(
+            val componentContext: ComponentContext,
+            val navigateCreateReport: () -> Unit,
+            val navigateEditReport: (Long) -> Unit
+        ) : Child()
         data class ReportEditor(val componentContext: ComponentContext) : Child()
     }
 }

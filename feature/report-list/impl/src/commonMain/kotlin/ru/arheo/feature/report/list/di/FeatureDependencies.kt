@@ -3,5 +3,7 @@ package ru.arheo.feature.report.list.di
 import com.arkivanov.decompose.ComponentContext
 
 data class FeatureDependencies(
-    val componentContext: ComponentContext
+    val componentContext: ComponentContext,
+    val navigateCreateReport: () -> Unit,
+    val navigateEditReport: (Long) -> Unit
 )
