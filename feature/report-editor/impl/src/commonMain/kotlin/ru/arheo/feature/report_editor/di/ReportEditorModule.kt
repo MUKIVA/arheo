@@ -13,22 +13,22 @@ val reportEditorModule = module {
     scope(named(REPORT_EDITOR_SCOPE)) {
         scoped { ReportEditorStoreFactory(get(), get(), get()) }
     }
-    factory<ReportEditorComponent.Factory> {
-        val koin = getKoin()
-        val selectorFactory = koin.get<ReportSelectorComponent.Factory>()
-        ReportEditorComponent.Factory { componentContext, reportId, output ->
-            val scope = koin.createScope(
-                "ReportEditor@${componentContext.hashCode()}",
-                named(REPORT_EDITOR_SCOPE),
-            )
-            DefaultReportEditorComponent(
-                componentContext = componentContext,
-                reportEditorStoreFactory = scope.get(),
-                selectorFactory = selectorFactory,
-                reportId = reportId,
-                output = output,
-                koinScope = scope,
-            )
-        }
-    }
+//    factory<ReportEditorComponent.Factory> {
+//        val koin = getKoin()
+//        val selectorFactory = koin.get<ReportSelectorComponent.Factory>()
+//        ReportEditorComponent.Factory { componentContext, reportId, output ->
+//            val scope = koin.createScope(
+//                "ReportEditor@${componentContext.hashCode()}",
+//                named(REPORT_EDITOR_SCOPE),
+//            )
+//            DefaultReportEditorComponent(
+//                componentContext = componentContext,
+//                reportEditorStoreFactory = scope.get(),
+//                selectorFactory = selectorFactory,
+//                reportId = reportId,
+//                output = output,
+//                koinScope = scope,
+//            )
+//        }
+//    }
 }

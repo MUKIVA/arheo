@@ -1,68 +1,66 @@
 package ru.arheo
 
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowDecoration
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.stringResource
+import org.koin.core.Koin
 import org.koin.core.context.startKoin
+import ru.arheo.app.generated.resources.Res
+import ru.arheo.app.generated.resources.app_name
 import ru.arheo.core.di.coreModule
+import ru.arheo.di.createAppModule
 import ru.arheo.feature.report_editor.di.reportEditorModule
-import ru.arheo.feature.report_editor.presentation.ReportEditorComponent
-import ru.arheo.feature.report_list.di.reportListModule
 import ru.arheo.feature.report_selector.di.reportSelectorModule
-import ru.arheo.feature.report_list.presentation.ReportListComponent
-import ru.arheo.root.DefaultRootComponent
-import ru.arheo.root.RootContent
+import ru.arheo.ui.App
 import ru.arheo.ui.theme.ArheoTheme
-import javax.swing.SwingUtilities
 
-@OptIn(ExperimentalComposeUiApi::class)
-fun main() {
-    val koin = startKoin {
-        modules(coreModule, reportListModule, reportEditorModule, reportSelectorModule)
-    }.koin
-    val lifecycle = LifecycleRegistry()
-    val rootComponent = runOnUiThread {
-        DefaultRootComponent(
-            componentContext = DefaultComponentContext(lifecycle = lifecycle),
-            reportListFactory = koin.get<ReportListComponent.Factory>(),
-            reportEditorFactory = koin.get<ReportEditorComponent.Factory>(),
-        )
-    }
-    lifecycle.onCreate()
-    lifecycle.onStart()
-    lifecycle.onResume()
+fun main() = runBlocking {
+    val koin = initDiGraph()
+
+    val lifecycle = koin.get<LifecycleRegistry>()
+
+    lifecycle.init()
+
     application {
-        Window(
-            onCloseRequest = {
-                lifecycle.onPause()
-                lifecycle.onStop()
-                lifecycle.onDestroy()
-                exitApplication()
-            },
-            title = "Arheo — Управление археологическими отчётами",
-            state = rememberWindowState(width = 1200.dp, height = 800.dp),
-        ) {
-            ArheoTheme {
-                Scaffold {
-                    RootContent(rootComponent)
-                }
-            }
+        ArheoTheme {
+            Window(
+                onCloseRequest = {
+                    lifecycle.destroy()
+                    exitApplication()
+                },
+                title = stringResource(Res.string.app_name),
+                state = rememberWindowState(width = 1200.dp, height = 800.dp),
+                content = { App(Modifier.fillMaxSize()) }
+            )
         }
     }
 }
 
-private fun <T> runOnUiThread(block: () -> T): T {
-    if (SwingUtilities.isEventDispatchThread()) {
-        return block()
-    }
-    var result: T? = null
-    SwingUtilities.invokeAndWait { result = block() }
-    @Suppress("UNCHECKED_CAST")
-    return result as T
+private fun initDiGraph(): Koin {
+    return startKoin {
+        modules(
+            coreModule,
+            createAppModule(),
+            reportEditorModule,
+            reportSelectorModule
+        )
+    }.koin
+}
+
+private fun LifecycleRegistry.init() {
+    onCreate()
+    onStart()
+    onResume()
+}
+
+private fun LifecycleRegistry.destroy() {
+    onPause()
+    onStop()
+    onDestroy()
 }

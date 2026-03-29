@@ -7,13 +7,13 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
 import ru.arheo.core.data.FileManager
-import ru.arheo.core.data.ReportRepository
+import ru.arheo.core.data.ReportSource
 import ru.arheo.core.domain.model.Monument
-import ru.arheo.core.domain.model.Report
+import ru.arheo.core.domain.model.DataReport
 
 internal class ReportEditorStoreFactory(
     private val storeFactory: StoreFactory,
-    private val repository: ReportRepository,
+    private val repository: ReportSource,
     private val fileManager: FileManager,
 ) {
 
@@ -32,12 +32,12 @@ internal class ReportEditorStoreFactory(
     }
 
     private sealed interface Action {
-        data class ReportLoaded(val report: Report) : Action
+        data class ReportLoaded(val report: DataReport) : Action
         data class SuggestionsLoaded(val authors: List<String>, val workTypes: List<String>) : Action
     }
 
     private sealed interface Msg {
-        data class ReportLoaded(val report: Report) : Msg
+        data class ReportLoaded(val report: DataReport) : Msg
         data class SuggestionsLoaded(val authors: List<String>, val workTypes: List<String>) : Msg
         data class TitleChanged(val title: String) : Msg
         data class YearChanged(val year: String) : Msg
@@ -136,8 +136,8 @@ internal class ReportEditorStoreFactory(
             }
         }
 
-        private fun buildReport(state: ReportEditorStore.State, year: Int): Report =
-            Report(
+        private fun buildReport(state: ReportEditorStore.State, year: Int): DataReport =
+            DataReport(
                 id = state.reportId ?: 0L,
                 title = state.title.trim(),
                 year = year,
@@ -151,7 +151,7 @@ internal class ReportEditorStoreFactory(
         private suspend fun archiveIfNeeded(
             workingDirectory: String,
             hasFiles: Boolean,
-            report: Report,
+            report: DataReport,
         ): String? {
             if (!hasFiles) return null
             val archiveName = fileManager.computeArchiveName(report)

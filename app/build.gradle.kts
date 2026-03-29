@@ -37,6 +37,7 @@ kotlin {
             implementation(libs.decompose.extensions.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.compose.components.resources)
         }
 
         jvmMain.dependencies {
@@ -53,7 +54,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(
                 TargetFormat.Dmg,
-                TargetFormat.AppImage,
+                TargetFormat.Deb,
                 TargetFormat.Exe,
             )
             packageName = "Arheo"

@@ -1,7 +1,7 @@
 package ru.arheo.core.data
 
 import ru.arheo.core.domain.model.FileInfo
-import ru.arheo.core.domain.model.Report
+import ru.arheo.core.domain.model.DataReport
 
 interface FileManager {
     suspend fun createWorkingDirectory(): String
@@ -12,5 +12,5 @@ interface FileManager {
     suspend fun extractArchive(archivePath: String, workingDir: String)
     suspend fun cleanupWorkingDirectory(workingDir: String)
     suspend fun deleteArchive(archivePath: String)
-    fun computeArchiveName(report: Report): String
+    fun computeArchiveName(report: DataReport): String
 }

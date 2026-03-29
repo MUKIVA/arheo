@@ -32,47 +32,53 @@ import ru.arheo.feature.report_editor.presentation.ReportEditorStore
 import ru.arheo.feature.report_selector.ui.ReportSelectorContent
 
 @Composable
-fun ReportEditorContent(component: ReportEditorComponent) {
-    val state by component.state.collectAsState()
-    if (state.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
+fun ReportEditorContent(
+    component: ReportEditorComponent,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        Text("ReportEditorContent")
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-    ) {
-        Text(
-            text = if (state.isEditing) "Редактирование отчёта" else "Добавление отчёта",
-            style = MaterialTheme.typography.headlineMedium,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        if (state.error != null) {
-            Text(
-                text = state.error.orEmpty(),
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        MetadataSection(state, component)
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(8.dp))
-        MonumentsSection(state.monuments, component)
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(8.dp))
-        ReportSelectorContent(component.selectorComponent)
-        Spacer(modifier = Modifier.height(24.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
-        ActionButtons(state.isSaving, component)
-    }
+//    val state by component.state.collectAsState()
+//    if (state.isLoading) {
+//        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//            CircularProgressIndicator()
+//        }
+//        return
+//    }
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(24.dp)
+//            .verticalScroll(rememberScrollState()),
+//    ) {
+//        Text(
+//            text = if (state.isEditing) "Редактирование отчёта" else "Добавление отчёта",
+//            style = MaterialTheme.typography.headlineMedium,
+//        )
+//        Spacer(modifier = Modifier.height(16.dp))
+//        if (state.error != null) {
+//            Text(
+//                text = state.error.orEmpty(),
+//                color = MaterialTheme.colorScheme.error,
+//                style = MaterialTheme.typography.bodyMedium,
+//            )
+//            Spacer(modifier = Modifier.height(8.dp))
+//        }
+//        MetadataSection(state, component)
+//        Spacer(modifier = Modifier.height(16.dp))
+//        HorizontalDivider()
+//        Spacer(modifier = Modifier.height(8.dp))
+//        MonumentsSection(state.monuments, component)
+//        Spacer(modifier = Modifier.height(16.dp))
+//        HorizontalDivider()
+//        Spacer(modifier = Modifier.height(8.dp))
+//        ReportSelectorContent(component.selectorComponent)
+//        Spacer(modifier = Modifier.height(24.dp))
+//        HorizontalDivider()
+//        Spacer(modifier = Modifier.height(16.dp))
+//        ActionButtons(state.isSaving, component)
+//    }
 }
 
 @Composable

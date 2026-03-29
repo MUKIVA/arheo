@@ -1,0 +1,19 @@
+<resources>
+    <string name="table_title_report_name">Название отчёта</string>
+    <string name="table_title_report_authors">Автор(ы)</string>
+    <string name="table_title_year">Год</string>
+    <string name="table_title_work_type">Тип работ</string>
+    <string name="table_title_actions">Действия</string>
+
+    <string name="list_empty_meassage">Отчёты не найдены</string>
+
+    <string name="query_label">Поиск по отчётам...</string>
+    <string name="action_add_report">Добавить отчёт</string>
+    <string name="item_action_edit_content_description">Изменить</string>
+    <string name="item_action_delete_content_description">Удалить</string>
+
+    <string name="delete_alert_title">Удаление отчёта</string>
+    <string name="delete_alert_description">Вы уверены, что хотите удалить этот отчёт? Это действие нельзя отменить.</string>
+    <string name="delete_alert_confirm">Удалить</string>
+    <string name="delete_alert_dismiss">Отмена</string>
+</resources>

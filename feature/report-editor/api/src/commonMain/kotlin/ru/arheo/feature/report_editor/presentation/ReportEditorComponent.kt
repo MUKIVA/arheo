@@ -7,8 +7,8 @@ import ru.arheo.feature.report_selector.presentation.ReportSelectorComponent
 
 interface ReportEditorComponent {
 
-    val state: StateFlow<ReportEditorStore.State>
-    val selectorComponent: ReportSelectorComponent
+//    val state: StateFlow<ReportEditorStore.State>
+//    val selectorComponent: ReportSelectorComponent
 
     fun onTitleChanged(title: String)
     fun onYearChanged(year: String)
@@ -22,16 +22,16 @@ interface ReportEditorComponent {
     fun onSave()
     fun onCancel()
 
-    sealed interface Output {
-        data object Saved : Output
-        data object Cancelled : Output
-    }
+//    sealed interface Output {
+//        data object Saved : Output
+//        data object Cancelled : Output
+//    }
 
-    fun interface Factory {
-        fun create(
-            componentContext: ComponentContext,
-            reportId: Long?,
-            output: (Output) -> Unit,
-        ): ReportEditorComponent
-    }
+//    fun interface Factory {
+//        fun create(
+//            componentContext: ComponentContext,
+//            reportId: Long?,
+//            output: (Output) -> Unit,
+//        ): ReportEditorComponent
+//    }
 }
