@@ -16,7 +16,7 @@ import org.koin.core.context.unloadKoinModules
 import ru.arheo.feature.report.selector.di.FeatureDependencies
 import ru.arheo.feature.report.selector.di.FeatureScope
 import ru.arheo.feature.report.selector.di.createFeatureModule
-import ru.arheo.feature.report.selector.ui.ReportSelectorContent
+import ru.arheo.feature.report.selector.ui.ReportSelectorRoot
 
 internal class FeatureLauncher : ReportSelectorFeatureLauncher {
 
@@ -39,7 +39,7 @@ internal class FeatureLauncher : ReportSelectorFeatureLauncher {
         CompositionLocalProvider(
             LocalKoinScope provides ComposeContextWrapper(scope)
         ) {
-            ReportSelectorContent(modifier)
+            ReportSelectorRoot(modifier)
         }
 
         DisposableEffect(Unit) {

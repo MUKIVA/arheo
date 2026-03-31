@@ -1,11 +1,11 @@
 package ru.arheo.feature.report.selector.presentation
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
-import ru.arheo.core.data.FileSource
+import ru.arheo.feature.report.selector.domain.FileRepository
 
 internal class ReportSelectorStoreFactory(
     private val storeFactory: StoreFactory,
-    private val fileSource: FileSource,
+    private val fileRepository: FileRepository,
 ) {
 
     fun create(): ReportSelectorStore {
@@ -13,8 +13,8 @@ internal class ReportSelectorStoreFactory(
             implementation = storeFactory.create(
                 name = STORE_NAME,
                 initialState = ReportSelectorStore.State.Loading,
-                bootstrapper = ReportSelectorBootstrapper(fileSource),
-                executorFactory = { ReportSelectorExecutor(fileSource) } ,
+                bootstrapper = ReportSelectorBootstrapper(fileRepository),
+                executorFactory = { ReportSelectorExecutor(fileRepository) },
                 reducer = ReportSelectorReducer(),
             )
         )
@@ -24,4 +24,3 @@ internal class ReportSelectorStoreFactory(
         const val STORE_NAME = "ReportSelectorStore"
     }
 }
-

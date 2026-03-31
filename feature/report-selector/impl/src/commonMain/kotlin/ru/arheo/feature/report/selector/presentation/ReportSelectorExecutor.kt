@@ -2,15 +2,16 @@ package ru.arheo.feature.report.selector.presentation
 
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
-import ru.arheo.core.data.FileSource
+import ru.arheo.feature.report.selector.domain.FileRepository
 
 internal class ReportSelectorExecutor(
-    private val fileSource: FileSource
+    private val fileRepository: FileRepository
 ) : CoroutineExecutor<ReportSelectorStore.Intent, ReportSelectorAction, ReportSelectorStore.State, ReportSelectorPatch, Nothing>() {
 
     override fun executeAction(action: ReportSelectorAction) {
         when (action) {
-            is ReportSelectorAction.WorkingDirectoryCreated -> dispatch(ReportSelectorPatch.WorkingDirectorySet(action.path))
+            is ReportSelectorAction.WorkingDirectoryCreated ->
+                dispatch(ReportSelectorPatch.WorkingDirectorySet(action.path))
         }
     }
 
@@ -24,31 +25,34 @@ internal class ReportSelectorExecutor(
     }
 
     private fun handleAttachFiles(paths: List<String>) {
-//        val dir = state().workingDirectory.ifEmpty { return }
-//        scope.launch {
-//            fileSource.copyToWorking(dir, paths)
-//            val files = fileSource.listWorkingFiles(dir)
-//            dispatch(ReportSelectorPatch.FilesUpdated(files))
-//        }
+        val content = state() as? ReportSelectorStore.State.Content ?: return
+        val dir = content.workingDirectory.ifEmpty { return }
+        scope.launch {
+            fileRepository.copyToWorking(dir, paths)
+            val files = fileRepository.listWorkingFiles(dir)
+            dispatch(ReportSelectorPatch.FilesUpdated(files))
+        }
     }
 
     private fun handleRemoveFile(fileName: String) {
-//        val dir = state().workingDirectory.ifEmpty { return }
-//        scope.launch {
-//            fileSource.removeFromWorking(dir, fileName)
-//            val files = fileSource.listWorkingFiles(dir)
-//            dispatch(ReportSelectorPatch.FilesUpdated(files))
-//        }
+        val content = state() as? ReportSelectorStore.State.Content ?: return
+        val dir = content.workingDirectory.ifEmpty { return }
+        scope.launch {
+            fileRepository.removeFromWorking(dir, fileName)
+            val files = fileRepository.listWorkingFiles(dir)
+            dispatch(ReportSelectorPatch.FilesUpdated(files))
+        }
     }
 
     private fun handleLoadArchive(archivePath: String) {
-//        val dir = state().workingDirectory.ifEmpty { return }
-//        dispatch(ReportSelectorPatch.LoadingChanged(true))
-//        scope.launch {
-//            fileSource.extractArchive(archivePath, dir)
-//            val files = fileSource.listWorkingFiles(dir)
-//            dispatch(ReportSelectorPatch.FilesUpdated(files))
-//            dispatch(ReportSelectorPatch.LoadingChanged(false))
-//        }
+        val content = state() as? ReportSelectorStore.State.Content ?: return
+        val dir = content.workingDirectory.ifEmpty { return }
+        dispatch(ReportSelectorPatch.ShowLoading)
+        scope.launch {
+            fileRepository.extractArchive(archivePath, dir)
+            val files = fileRepository.listWorkingFiles(dir)
+            dispatch(ReportSelectorPatch.WorkingDirectorySet(dir))
+            dispatch(ReportSelectorPatch.FilesUpdated(files))
+        }
     }
 }

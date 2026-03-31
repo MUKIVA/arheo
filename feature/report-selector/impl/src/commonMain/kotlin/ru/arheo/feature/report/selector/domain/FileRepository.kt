@@ -29,7 +29,4 @@ internal interface FileRepository {
     suspend fun deleteArchive(
         archivePath: String
     )
-//    fun computeArchiveName(
-//        report: ReportData
-//    ): String
 }

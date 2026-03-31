@@ -1,0 +1,20 @@
+<resources>
+    <string name="selector_section_title">Материалы</string>
+
+    <string name="selector_action_add_files">Добавить файлы</string>
+    <string name="selector_action_add_directory">Добавить директорию</string>
+    <string name="selector_action_remove">Удалить</string>
+
+    <string name="selector_attached_files_count">Прикреплённые файлы (%1$d):</string>
+
+    <string name="selector_drop_zone_active">Отпустите для добавления</string>
+    <string name="selector_drop_zone_idle">Перетащите файлы сюда</string>
+
+    <string name="selector_file_chooser_title">Выберите файлы</string>
+    <string name="selector_directory_chooser_title">Выберите директорию</string>
+
+    <string name="selector_file_size_bytes">%1$d Б</string>
+    <string name="selector_file_size_kb">%1$d КБ</string>
+    <string name="selector_file_size_mb">%1$s МБ</string>
+    <string name="selector_file_size_gb">%1$s ГБ</string>
+</resources>

@@ -26,4 +26,5 @@ Thumbs.db
 .cache/
 
 # Database
-**/resources/meta/
+**/resources
+

@@ -2,10 +2,13 @@ package ru.arheo.feature.report.selector.presentation
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.subscribe
+import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
 import ru.arheo.core.util.getStore
 
 internal class DefaultReportSelectorComponent(
@@ -20,11 +23,8 @@ internal class DefaultReportSelectorComponent(
             reportSelectorStoreFactory.create()
         }
 
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    override val state: StateFlow<ReportSelectorComponent.State> =
-//        store.stateFlow
-//            .map { storeState -> storeState.toComponentState() }
-//            .stateIn(coroutineScope, SharingStarted.Eagerly, ReportSelectorComponent.State())
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val state: StateFlow<ReportSelectorStore.State> = store.stateFlow
 
     init {
         lifecycle.subscribe(onDestroy = {
@@ -47,12 +47,4 @@ internal class DefaultReportSelectorComponent(
     override fun loadArchive(archivePath: String) {
         store.accept(ReportSelectorStore.Intent.LoadArchive(archivePath))
     }
-
-//    private fun ReportSelectorStore.State.toComponentState(): ReportSelectorComponent.State =
-//        ReportSelectorComponent.State(
-//            attachedFiles = attachedFiles,
-//            isDraggingOver = isDraggingOver,
-//            workingDirectory = workingDirectory,
-//            isLoading = isLoading,
-//        )
 }

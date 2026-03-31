@@ -3,7 +3,7 @@ package ru.arheo.feature.report.selector.presentation
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.arkivanov.mvikotlin.core.store.Store
-import ru.arheo.core.domain.model.FileInfoData
+import ru.arheo.feature.report.selector.presentation.models.UiFileInfo
 
 internal class ReportSelectorStore(
     implementation: Store<Intent, State, Nothing>
@@ -25,7 +25,7 @@ internal class ReportSelectorStore(
 
         @Immutable
         data class Content(
-            val attachedFiles: List<FileInfoData> = emptyList(),
+            val attachedFiles: List<UiFileInfo> = emptyList(),
             val isDraggingOver: Boolean = false,
             val workingDirectory: String = String()
         ) : State

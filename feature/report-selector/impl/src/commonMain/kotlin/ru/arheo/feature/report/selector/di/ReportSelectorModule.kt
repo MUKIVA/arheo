@@ -13,9 +13,9 @@ internal fun createFeatureModule(
 ) = module {
     scope<FeatureScope> {
         scoped { deps.componentContext }
-        scoped { ReportSelectorStoreFactory(get(), get()) }
         scoped { DefaultFileRepository(get()) }
             .bind<FileRepository>()
+        scoped { ReportSelectorStoreFactory(get(), get()) }
         scoped {
             DefaultReportSelectorComponent(
                 componentContext = get(),
@@ -24,4 +24,3 @@ internal fun createFeatureModule(
         }.bind<ReportSelectorComponent>()
     }
 }
-

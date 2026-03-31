@@ -1,6 +1,8 @@
 package ru.arheo.feature.report.selector.presentation
 
 import com.arkivanov.mvikotlin.core.store.Reducer
+import ru.arheo.feature.report.selector.domain.models.FileInfo
+import ru.arheo.feature.report.selector.presentation.models.UiFileInfo
 
 internal class ReportSelectorReducer : Reducer<ReportSelectorStore.State, ReportSelectorPatch> {
     override fun ReportSelectorStore.State.reduce(
@@ -15,29 +17,31 @@ internal class ReportSelectorReducer : Reducer<ReportSelectorStore.State, Report
     private fun reduce(
         state: ReportSelectorStore.State.Loading,
         patch: ReportSelectorPatch
-    ) = when (patch) {
-        is ReportSelectorPatch.LoadingChanged -> ReportSelectorStore.State.Content()
+    ): ReportSelectorStore.State = when (patch) {
+        is ReportSelectorPatch.WorkingDirectorySet ->
+            ReportSelectorStore.State.Content(workingDirectory = patch.path)
         else -> state
     }
 
     private fun reduce(
         state: ReportSelectorStore.State.Content,
         patch: ReportSelectorPatch
-    ) = with(state) {
-        when (patch) {
-            is ReportSelectorPatch.WorkingDirectorySet ->
-                copy(workingDirectory = patch.path)
-            is ReportSelectorPatch.FilesUpdated ->
-                copy(attachedFiles = patch.files)
-            is ReportSelectorPatch.DragOverChanged ->
-                copy(isDraggingOver = patch.isDragging)
-            is ReportSelectorPatch.LoadingChanged -> if (patch.isLoading) {
-                ReportSelectorStore.State.Loading
-            } else {
-                state
-            }
-        }
+    ): ReportSelectorStore.State = when (patch) {
+        is ReportSelectorPatch.WorkingDirectorySet ->
+            state.copy(workingDirectory = patch.path)
+        is ReportSelectorPatch.FilesUpdated ->
+            state.copy(attachedFiles = patch.files.asUiFileInfoList())
+        is ReportSelectorPatch.DragOverChanged ->
+            state.copy(isDraggingOver = patch.isDragging)
+        is ReportSelectorPatch.ShowLoading ->
+            ReportSelectorStore.State.Loading
     }
+}
 
-
+private fun List<FileInfo>.asUiFileInfoList(): List<UiFileInfo> = map { item ->
+    UiFileInfo(
+        name = item.name.value,
+        size = item.size.value,
+        isDirectory = item.isDirectory.value,
+    )
 }
