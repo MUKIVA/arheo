@@ -9,6 +9,8 @@ import com.arkivanov.mvikotlin.logging.store.LoggingStoreFactory
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import ru.arheo.feature.report.selector.ReportSelectorFeatureLauncher
+import ru.arheo.feature.report.selector.createReportSelectorFeatureLauncher
 import ru.arheo.navigation.DefaultRootComponent
 import ru.arheo.navigation.RootComponent
 
@@ -17,7 +19,11 @@ internal fun createAppModule() = module {
         .bind<Lifecycle>()
     single<ComponentContext> { DefaultComponentContext(get()) }
     single<RootComponent> {
-        DefaultRootComponent(componentContext = get())
+        DefaultRootComponent(get(), get())
     }
     single<StoreFactory> { LoggingStoreFactory(DefaultStoreFactory()) }
+
+    factory<ReportSelectorFeatureLauncher> {
+        createReportSelectorFeatureLauncher()
+    }
 }

@@ -2,6 +2,8 @@
 
 package ru.arheo.feature.report.selector.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,6 +19,9 @@ fun ReportSelectorContent(
     modifier: Modifier = Modifier,
     component: ReportSelectorComponent = koinInject()
 ) {
+    Box(modifier = modifier) {
+        Text("Selector Content")
+    }
 //    val state by component.state.collectAsState()
 
 

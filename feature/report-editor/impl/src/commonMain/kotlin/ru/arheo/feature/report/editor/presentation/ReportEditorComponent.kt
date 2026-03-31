@@ -1,9 +1,10 @@
 package ru.arheo.feature.report.editor.presentation
 
+import com.arkivanov.decompose.ComponentContext
 import kotlinx.coroutines.flow.StateFlow
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
-internal interface ReportEditorComponent {
+internal interface ReportEditorComponent : ComponentContext {
     val state: StateFlow<ReportEditorStore.State>
 
     fun onNameChanged(name: String)

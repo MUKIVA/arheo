@@ -9,7 +9,7 @@ interface ReportSelectorFeatureLauncher {
     @Composable
     fun launch(
         componentContext: ComponentContext,
-        modifier: Modifier = Modifier
+        modifier: Modifier
     )
 
 }

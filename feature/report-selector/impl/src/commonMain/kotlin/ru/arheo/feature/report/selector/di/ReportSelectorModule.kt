@@ -4,6 +4,8 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import ru.arheo.feature.report.selector.data.DefaultFileRepository
 import ru.arheo.feature.report.selector.domain.FileRepository
+import ru.arheo.feature.report.selector.presentation.DefaultReportSelectorComponent
+import ru.arheo.feature.report.selector.presentation.ReportSelectorComponent
 import ru.arheo.feature.report.selector.presentation.ReportSelectorStoreFactory
 
 internal fun createFeatureModule(
@@ -14,6 +16,12 @@ internal fun createFeatureModule(
         scoped { ReportSelectorStoreFactory(get(), get()) }
         scoped { DefaultFileRepository(get()) }
             .bind<FileRepository>()
+        scoped {
+            DefaultReportSelectorComponent(
+                componentContext = get(),
+                reportSelectorStoreFactory = get(),
+            )
+        }.bind<ReportSelectorComponent>()
     }
 }
 

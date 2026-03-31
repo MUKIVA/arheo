@@ -29,6 +29,7 @@ import arheo.feature.report_editor.impl.generated.resources.editor_field_year_pl
 import arheo.feature.report_editor.impl.generated.resources.editor_title_create
 import arheo.feature.report_editor.impl.generated.resources.editor_title_edit
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentCulture
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentLocation
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentName
@@ -41,6 +42,7 @@ import ru.arheo.feature.report.editor.presentation.models.UiMonument
 @Composable
 internal fun ReportEditorContent(
     state: ReportEditorStore.State.Content,
+    reportSelector: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     onReportNameChanged: (String) -> Unit = {},
     onReportYearChanged: (String) -> Unit = {},
@@ -92,11 +94,11 @@ internal fun ReportEditorContent(
     )
     Spacer(modifier = Modifier.height(8.dp))
     HorizontalDivider()
-//        Spacer(modifier = Modifier.height(8.dp))
-//        ReportSelectorContent(component.selectorComponent)
-//        Spacer(modifier = Modifier.height(24.dp))
-//        HorizontalDivider()
-//        Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(8.dp))
+    reportSelector()
+    Spacer(modifier = Modifier.height(8.dp))
+    HorizontalDivider()
+    Spacer(modifier = Modifier.height(8.dp))
     ActionButtons(
         isSaving = state.isSaving,
         onSave = onSaveReport,
