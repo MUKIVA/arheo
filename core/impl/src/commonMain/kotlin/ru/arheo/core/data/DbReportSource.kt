@@ -20,7 +20,7 @@ import ru.arheo.core.db.ReportAuthorTable
 import ru.arheo.core.db.ReportDistrictTable
 import ru.arheo.core.db.ReportKeywordTable
 import ru.arheo.core.db.ReportTable
-import ru.arheo.core.domain.model.Monument
+import ru.arheo.core.domain.model.MonumentData
 import ru.arheo.core.domain.model.ReportData
 
 internal class DbReportSource(
@@ -157,12 +157,12 @@ internal class DbReportSource(
             .where { ReportKeywordTable.reportId eq reportId }
             .map { it[ReportKeywordTable.keyword] }
 
-    private fun loadMonumentsForReport(reportId: Long): List<Monument> =
+    private fun loadMonumentsForReport(reportId: Long): List<MonumentData> =
         MonumentTable
             .selectAll()
             .where { MonumentTable.reportId eq reportId }
             .map { row ->
-                Monument(
+                MonumentData(
                     id = row[MonumentTable.id].value,
                     name = row[MonumentTable.name],
                     type = row[MonumentTable.type],

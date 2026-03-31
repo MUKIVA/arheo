@@ -1,6 +1,7 @@
 package ru.arheo.feature.report.editor.presentation
 
 import com.arkivanov.mvikotlin.core.store.Reducer
+import ru.arheo.feature.report.editor.domian.models.monument.Monument
 import ru.arheo.feature.report.editor.domian.models.report.Report
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
@@ -66,6 +67,15 @@ internal class ReportEditorReducer : Reducer<ReportEditorStore.State, ReportEdit
         is ReportEditorPatch.MonumentAdded -> state.copy(
             monuments = state.monuments + UiMonument.default()
         )
+        is ReportEditorPatch.Saving -> state.copy(
+            isSaving = true, error = null
+        )
+        is ReportEditorPatch.SaveError -> state.copy(
+            isSaving = false, error = patch.message
+        )
+        is ReportEditorPatch.Saved -> state.copy(
+            isSaving = false
+        )
         else -> state
     }
 
@@ -85,5 +95,17 @@ internal class ReportEditorReducer : Reducer<ReportEditorStore.State, ReportEdit
             workType = workType.value,
             districts = districts.map { it.value },
             keywords = keywords.map { it.value },
+            monuments = monuments.map { it.toUi() },
+            archiveFilePath = archiveFilePath,
         )
+
+    private fun Monument.toUi(): UiMonument = UiMonument(
+        id = id,
+        name = name,
+        type = type,
+        culture = culture,
+        period = period,
+        geographicLocation = geographicLocation,
+        number = number,
+    )
 }

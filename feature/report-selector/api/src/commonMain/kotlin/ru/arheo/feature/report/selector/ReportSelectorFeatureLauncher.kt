@@ -9,7 +9,8 @@ interface ReportSelectorFeatureLauncher {
     @Composable
     fun launch(
         componentContext: ComponentContext,
-        modifier: Modifier
+        modifier: Modifier,
+        archiveFilePath: String? = null,
+        onFileStateChanged: (workingDirectory: String, hasFiles: Boolean) -> Unit = { _, _ -> },
     )
-
 }

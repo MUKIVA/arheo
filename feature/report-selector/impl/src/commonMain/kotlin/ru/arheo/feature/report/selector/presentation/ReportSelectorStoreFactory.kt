@@ -6,6 +6,7 @@ import ru.arheo.feature.report.selector.domain.FileRepository
 internal class ReportSelectorStoreFactory(
     private val storeFactory: StoreFactory,
     private val fileRepository: FileRepository,
+    private val archiveFilePath: String?,
 ) {
 
     fun create(): ReportSelectorStore {
@@ -13,7 +14,7 @@ internal class ReportSelectorStoreFactory(
             implementation = storeFactory.create(
                 name = STORE_NAME,
                 initialState = ReportSelectorStore.State.Loading,
-                bootstrapper = ReportSelectorBootstrapper(fileRepository),
+                bootstrapper = ReportSelectorBootstrapper(fileRepository, archiveFilePath),
                 executorFactory = { ReportSelectorExecutor(fileRepository) },
                 reducer = ReportSelectorReducer(),
             )

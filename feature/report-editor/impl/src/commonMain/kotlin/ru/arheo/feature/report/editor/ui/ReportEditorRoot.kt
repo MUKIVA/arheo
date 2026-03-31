@@ -6,6 +6,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import org.koin.compose.koinInject
 import ru.arheo.feature.report.editor.presentation.ReportEditorComponent
@@ -21,6 +24,9 @@ internal fun ReportEditorRoot(
     val state by component.state.collectAsState()
     val scrollState = rememberScrollState()
 
+    var selectorWorkingDir by remember { mutableStateOf("") }
+    var selectorHasFiles by remember { mutableStateOf(false) }
+
     when (val instance = state) {
         is ReportEditorStore.State.Content ->
             ReportEditorContent(
@@ -28,7 +34,12 @@ internal fun ReportEditorRoot(
                 reportSelector = {
                     reportSelector.launch(
                         componentContext = component,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        archiveFilePath = instance.archiveFilePath,
+                        onFileStateChanged = { workingDir, hasFiles ->
+                            selectorWorkingDir = workingDir
+                            selectorHasFiles = hasFiles
+                        },
                     )
                 },
                 onReportNameChanged      = component::onNameChanged,
@@ -43,7 +54,9 @@ internal fun ReportEditorRoot(
                 onMonumentItemUpdate     = component::onUpdateMonument,
                 onMonumentItemRemove     = component::onRemoveMonument,
                 onMonumentItemAdd        = component::onAddMonument,
-                onSaveReport             = component::onSave,
+                onSaveReport             = {
+                    component.onSave(selectorWorkingDir, selectorHasFiles)
+                },
                 onCancel                 = component::onCancel,
                 modifier = modifier.verticalScroll(scrollState)
             )

@@ -3,7 +3,7 @@ package ru.arheo.core.domain.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Monument(
+data class MonumentData(
     val id: Long = 0L,
     val name: String = "",
     val type: String = "",

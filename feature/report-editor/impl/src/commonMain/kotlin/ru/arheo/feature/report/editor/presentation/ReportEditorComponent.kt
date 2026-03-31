@@ -19,6 +19,6 @@ internal interface ReportEditorComponent : ComponentContext {
     fun onUpdateMonument(index: Int, monument: UiMonument)
     fun onAddMonument()
     fun onRemoveMonument(index: Int)
-    fun onSave()
+    fun onSave(workingDirectory: String, hasFiles: Boolean)
     fun onCancel()
 }

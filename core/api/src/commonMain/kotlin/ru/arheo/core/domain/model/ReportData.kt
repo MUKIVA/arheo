@@ -11,7 +11,7 @@ data class ReportData(
     val workType: String = "",
     val districts: List<String> = emptyList(),
     val keywords: List<String> = emptyList(),
-    val monuments: List<Monument> = emptyList(),
+    val monuments: List<MonumentData> = emptyList(),
     val reportFilePath: String? = null,
     val archiveFilePath: String? = null,
 )

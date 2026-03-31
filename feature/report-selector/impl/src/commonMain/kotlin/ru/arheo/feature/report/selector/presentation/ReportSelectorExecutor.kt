@@ -12,6 +12,8 @@ internal class ReportSelectorExecutor(
         when (action) {
             is ReportSelectorAction.WorkingDirectoryCreated ->
                 dispatch(ReportSelectorPatch.WorkingDirectorySet(action.path))
+            is ReportSelectorAction.ArchiveExtracted ->
+                dispatch(ReportSelectorPatch.FilesUpdated(action.files))
         }
     }
 

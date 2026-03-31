@@ -47,6 +47,7 @@ internal class ReportEditorStore(
             val districts: List<String> = emptyList(),
             val keywords: List<String> = emptyList(),
             val monuments: List<UiMonument> = emptyList(),
+            val archiveFilePath: String? = null,
             val isSaving: Boolean = false,
             val error: String? = null,
         ) : State {

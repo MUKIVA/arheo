@@ -1,9 +1,16 @@
 package ru.arheo.feature.report.editor.presentation
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.subscribe
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import ru.arheo.core.util.getStore
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
@@ -14,6 +21,8 @@ internal class DefaultReportEditorComponent(
     private val navigateBack: () -> Unit
 ) : ReportEditorComponent, ComponentContext by componentContext {
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+
     private val store: ReportEditorStore =
         instanceKeeper.getStore("ReportEditorStore") {
             reportEditorStoreFactory.create(reportId)
@@ -21,6 +30,19 @@ internal class DefaultReportEditorComponent(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val state: StateFlow<ReportEditorStore.State> = store.stateFlow
+
+    init {
+        lifecycle.subscribe(onDestroy = { coroutineScope.cancel() })
+        coroutineScope.launch {
+            @OptIn(ExperimentalCoroutinesApi::class)
+            store.labels.collect { label ->
+                when (label) {
+                    is ReportEditorStore.Label.Saved -> navigateBack()
+                    is ReportEditorStore.Label.ArchivePathLoaded -> Unit
+                }
+            }
+        }
+    }
 
     override fun onNameChanged(name: String) {
         store.accept(ReportEditorStore.Intent.UpdateName(name))
@@ -70,8 +92,8 @@ internal class DefaultReportEditorComponent(
         store.accept(ReportEditorStore.Intent.RemoveMonument(index))
     }
 
-    override fun onSave() {
-        navigateBack()
+    override fun onSave(workingDirectory: String, hasFiles: Boolean) {
+        store.accept(ReportEditorStore.Intent.Save(workingDirectory, hasFiles))
     }
 
     override fun onCancel() {
