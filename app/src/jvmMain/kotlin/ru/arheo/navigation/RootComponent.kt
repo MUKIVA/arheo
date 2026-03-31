@@ -13,7 +13,11 @@ interface RootComponent {
             val navigateCreateReport: () -> Unit,
             val navigateEditReport: (Long) -> Unit
         ) : Child()
-        data class ReportEditor(val componentContext: ComponentContext) : Child()
+        data class ReportEditor(
+            val componentContext: ComponentContext,
+            val reportId: Long?,
+            val navigateBack: () -> Unit
+        ) : Child()
     }
 }
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,22 +50,17 @@ internal fun ReportListContent(
     onDeleteDismiss: () -> Unit = {}
 ) = Column(modifier = modifier) {
     TopBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
         searchQuery = state.searchQuery,
         onSearchQueryChanged = onSearchQueryChanged,
         onAddClick = onAddReportClick,
     )
-
+    Spacer(Modifier.height(8.dp))
     ReportTable(
         reports = state.reports,
         onEditReport = onEditReportClick,
         onDeleteReport = onDeleteReportClick,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp)
             .clip(RoundedCornerShape(16.dp))
             .border(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),

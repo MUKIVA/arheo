@@ -15,7 +15,6 @@ import ru.arheo.app.generated.resources.Res
 import ru.arheo.app.generated.resources.app_name
 import ru.arheo.core.di.coreModule
 import ru.arheo.di.createAppModule
-import ru.arheo.feature.report_editor.di.reportEditorModule
 import ru.arheo.ui.App
 import ru.arheo.ui.theme.ArheoTheme
 
@@ -46,7 +45,6 @@ private fun initDiGraph(): Koin {
         modules(
             coreModule,
             createAppModule(),
-            reportEditorModule,
         )
     }.koin
 }

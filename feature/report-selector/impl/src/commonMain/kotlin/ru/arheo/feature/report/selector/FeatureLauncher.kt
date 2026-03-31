@@ -35,11 +35,7 @@ internal class FeatureLauncher : ReportSelectorFeatureLauncher {
         }
         val module = remember { createFeatureModule(deps) }
 
-        LaunchedEffect(Unit) {
-            loadKoinModules(
-                modules = listOf(module)
-            )
-        }
+        loadKoinModules(listOf(module))
 
         CompositionLocalProvider(
             LocalKoinScope provides ComposeContextWrapper(scope)

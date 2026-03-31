@@ -1,0 +1,13 @@
+<resources>
+    <string name="editor_title_edit">Редактирование отчёта</string>
+    <string name="editor_title_create">Добавление отчёта</string>
+
+    <string name="editor_field_name_placeholder">Название отчёта *</string>
+    <string name="editor_field_year_placeholder">Год *</string>
+    <string name="editor_field_authors_placeholder">Авторы * (через запятую)</string>
+    <string name="editor_field_work_type_placeholder">Тип работ</string>
+    <string name="editor_field_districts_placeholder">Районы (через запятую)</string>
+    <string name="editor_field_keywords_placeholder">Ключевые слова (через запятую)</string>
+
+    <string name="editor_section_monument_title">Памятники</string>
+</resources>

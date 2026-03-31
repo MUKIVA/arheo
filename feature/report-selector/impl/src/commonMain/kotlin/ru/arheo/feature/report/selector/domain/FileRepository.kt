@@ -1,9 +1,6 @@
 package ru.arheo.feature.report.selector.domain
 
-import ru.arheo.feature.report.selector.domain.models.Directory
 import ru.arheo.feature.report.selector.domain.models.FileInfo
-import ru.arheo.feature.report.selector.domain.models.FileInfoName
-import ru.arheo.feature.report.selector.domain.models.Path
 
 internal interface FileRepository {
     suspend fun createWorkingDirectory(): String

@@ -12,7 +12,7 @@ internal class ReportSelectorStoreFactory(
         return ReportSelectorStore(
             implementation = storeFactory.create(
                 name = STORE_NAME,
-                initialState = ReportSelectorStore.State(),
+                initialState = ReportSelectorStore.State.Loading,
                 bootstrapper = ReportSelectorBootstrapper(fileSource),
                 executorFactory = { ReportSelectorExecutor(fileSource) } ,
                 reducer = ReportSelectorReducer(),

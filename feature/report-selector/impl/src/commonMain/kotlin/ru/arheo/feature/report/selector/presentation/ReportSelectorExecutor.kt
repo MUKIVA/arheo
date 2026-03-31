@@ -24,31 +24,31 @@ internal class ReportSelectorExecutor(
     }
 
     private fun handleAttachFiles(paths: List<String>) {
-        val dir = state().workingDirectory.ifEmpty { return }
-        scope.launch {
-            fileSource.copyToWorking(dir, paths)
-            val files = fileSource.listWorkingFiles(dir)
-            dispatch(ReportSelectorPatch.FilesUpdated(files))
-        }
+//        val dir = state().workingDirectory.ifEmpty { return }
+//        scope.launch {
+//            fileSource.copyToWorking(dir, paths)
+//            val files = fileSource.listWorkingFiles(dir)
+//            dispatch(ReportSelectorPatch.FilesUpdated(files))
+//        }
     }
 
     private fun handleRemoveFile(fileName: String) {
-        val dir = state().workingDirectory.ifEmpty { return }
-        scope.launch {
-            fileSource.removeFromWorking(dir, fileName)
-            val files = fileSource.listWorkingFiles(dir)
-            dispatch(ReportSelectorPatch.FilesUpdated(files))
-        }
+//        val dir = state().workingDirectory.ifEmpty { return }
+//        scope.launch {
+//            fileSource.removeFromWorking(dir, fileName)
+//            val files = fileSource.listWorkingFiles(dir)
+//            dispatch(ReportSelectorPatch.FilesUpdated(files))
+//        }
     }
 
     private fun handleLoadArchive(archivePath: String) {
-        val dir = state().workingDirectory.ifEmpty { return }
-        dispatch(ReportSelectorPatch.LoadingChanged(true))
-        scope.launch {
-            fileSource.extractArchive(archivePath, dir)
-            val files = fileSource.listWorkingFiles(dir)
-            dispatch(ReportSelectorPatch.FilesUpdated(files))
-            dispatch(ReportSelectorPatch.LoadingChanged(false))
-        }
+//        val dir = state().workingDirectory.ifEmpty { return }
+//        dispatch(ReportSelectorPatch.LoadingChanged(true))
+//        scope.launch {
+//            fileSource.extractArchive(archivePath, dir)
+//            val files = fileSource.listWorkingFiles(dir)
+//            dispatch(ReportSelectorPatch.FilesUpdated(files))
+//            dispatch(ReportSelectorPatch.LoadingChanged(false))
+//        }
     }
 }

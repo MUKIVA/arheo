@@ -5,6 +5,7 @@ import com.arkivanov.decompose.DelicateDecomposeApi
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
@@ -39,15 +40,12 @@ class DefaultRootComponent(
             }
 
         )
-        is Config.ReportEditor -> RootComponent.Child.ReportEditor(componentContext)
+        is Config.ReportEditor -> RootComponent.Child.ReportEditor(
+            componentContext = componentContext,
+            reportId = config.reportId,
+            navigateBack = { navigation.pop() }
+        )
     }
-
-//    private fun onReportEditorOutput(output: ReportEditorComponent.Output) {
-//        when (output) {
-//            is ReportEditorComponent.Output.Saved -> navigation.pop()
-//            is ReportEditorComponent.Output.Cancelled -> navigation.pop()
-//        }
-//    }
 
     @Serializable
     private sealed interface Config {

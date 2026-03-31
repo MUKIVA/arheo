@@ -1,9 +1,8 @@
-package ru.arheo.feature.report.list
+package ru.arheo.feature.report.editor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
@@ -14,35 +13,35 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.annotation.KoinInternalApi
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
-import ru.arheo.feature.report.list.di.FeatureDependencies
-import ru.arheo.feature.report.list.di.FeatureScope
-import ru.arheo.feature.report.list.di.createFeatureModule
-import ru.arheo.feature.report.list.ui.ReportListRoot
+import ru.arheo.feature.report.editor.di.FeatureDependencies
+import ru.arheo.feature.report.editor.di.FeatureScope
+import ru.arheo.feature.report.editor.di.createFeatureModule
+import ru.arheo.feature.report.editor.ui.ReportEditorRoot
 
-@OptIn(KoinInternalApi::class, KoinExperimentalAPI::class)
+@OptIn(KoinExperimentalAPI::class, KoinInternalApi::class)
 @Composable
-fun launchReportListContent(
+fun launcherReportEditorContent(
     componentContext: ComponentContext,
+    reportId: Long?,
     modifier: Modifier = Modifier,
-    onEditReport: (Long) -> Unit = {},
-    onCreateReport: () -> Unit = {}
+    navigateBack: () -> Unit = {}
 ) {
     val scope = rememberKoinScope(FeatureScope().scope)
-    val deps = remember(componentContext, onEditReport, onCreateReport) {
+    val deps = remember {
         FeatureDependencies(
             componentContext = componentContext,
-            navigateCreateReport = onCreateReport,
-            navigateEditReport = onEditReport
+            reportId = reportId,
+            navigateBack = navigateBack
         )
     }
     val module = remember { createFeatureModule(deps) }
 
-    loadKoinModules(modules = listOf(module))
+    loadKoinModules(listOf(module))
 
     CompositionLocalProvider(
         LocalKoinScope provides ComposeContextWrapper(scope)
     ) {
-        ReportListRoot(modifier)
+        ReportEditorRoot(modifier)
     }
 
     DisposableEffect(Unit) {

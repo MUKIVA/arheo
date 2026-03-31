@@ -5,7 +5,7 @@ import ru.arheo.core.domain.model.FileInfoData
 
 interface ReportSelectorComponent {
 
-    val state: StateFlow<State>
+//    val state: StateFlow<State>
 
     fun onAttachFiles(paths: List<String>)
     fun onRemoveFile(fileName: String)

@@ -17,7 +17,7 @@ fun ReportSelectorContent(
     modifier: Modifier = Modifier,
     component: ReportSelectorComponent = koinInject()
 ) {
-    val state by component.state.collectAsState()
+//    val state by component.state.collectAsState()
 
 
 //    Column(modifier = Modifier.fillMaxWidth()) {
