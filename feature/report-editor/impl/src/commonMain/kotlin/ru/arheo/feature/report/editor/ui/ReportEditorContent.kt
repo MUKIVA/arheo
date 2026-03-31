@@ -2,34 +2,45 @@ package ru.arheo.feature.report.editor.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import arheo.feature.report_editor.impl.generated.resources.Res
-import arheo.feature.report_editor.impl.generated.resources.editor_field_authors_placeholder
-import arheo.feature.report_editor.impl.generated.resources.editor_field_districts_placeholder
-import arheo.feature.report_editor.impl.generated.resources.editor_field_keywords_placeholder
-import arheo.feature.report_editor.impl.generated.resources.editor_field_name_placeholder
-import arheo.feature.report_editor.impl.generated.resources.editor_field_work_type_placeholder
-import arheo.feature.report_editor.impl.generated.resources.editor_field_year_placeholder
-import arheo.feature.report_editor.impl.generated.resources.editor_title_create
-import arheo.feature.report_editor.impl.generated.resources.editor_title_edit
+import arheo.feature.report_editor.impl.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentCulture
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentLocation
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentName
@@ -38,6 +49,11 @@ import ru.arheo.feature.report.editor.domian.models.monument.MonumentPeriod
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentType
 import ru.arheo.feature.report.editor.presentation.ReportEditorStore
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
+import java.time.Year
+
+private val YEAR_RANGE: List<String> by lazy {
+    (Year.now().value downTo 1950).map { it.toString() }
+}
 
 @Composable
 internal fun ReportEditorContent(
@@ -46,11 +62,14 @@ internal fun ReportEditorContent(
     modifier: Modifier = Modifier,
     onReportNameChanged: (String) -> Unit = {},
     onReportYearChanged: (String) -> Unit = {},
-    onReportAuthorsChanged: (String) -> Unit = {},
     onReportWorkTypeChanged: (String) -> Unit = {},
-    onReportDistrictsChanged: (String) -> Unit = {},
-    onReportKeywordsChanged: (String) -> Unit = {},
-    onMonumentItemUpdate: (Int, UiMonument) -> Unit = { index, item -> },
+    onAddAuthor: (String) -> Unit = {},
+    onRemoveAuthor: (String) -> Unit = {},
+    onAddDistrict: (String) -> Unit = {},
+    onRemoveDistrict: (String) -> Unit = {},
+    onAddKeyword: (String) -> Unit = {},
+    onRemoveKeyword: (String) -> Unit = {},
+    onMonumentItemUpdate: (Int, UiMonument) -> Unit = { _, _ -> },
     onMonumentItemRemove: (Int) -> Unit = {},
     onMonumentItemAdd: () -> Unit = {},
     onSaveReport: () -> Unit = {},
@@ -68,7 +87,7 @@ internal fun ReportEditorContent(
     Spacer(modifier = Modifier.height(16.dp))
     if (state.error != null) {
         Text(
-            text = state.error.orEmpty(),
+            text = state.error,
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodyMedium,
         )
@@ -78,10 +97,13 @@ internal fun ReportEditorContent(
         state = state,
         onReportNameChanged = onReportNameChanged,
         onReportYearChanged = onReportYearChanged,
-        onReportAuthorsChanged = onReportAuthorsChanged,
         onReportWorkTypeChanged = onReportWorkTypeChanged,
-        onReportDistrictsChanged = onReportDistrictsChanged,
-        onReportKeywordsChanged = onReportKeywordsChanged
+        onAddAuthor = onAddAuthor,
+        onRemoveAuthor = onRemoveAuthor,
+        onAddDistrict = onAddDistrict,
+        onRemoveDistrict = onRemoveDistrict,
+        onAddKeyword = onAddKeyword,
+        onRemoveKeyword = onRemoveKeyword,
     )
     Spacer(modifier = Modifier.height(8.dp))
     HorizontalDivider()
@@ -106,16 +128,20 @@ internal fun ReportEditorContent(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MetadataSection(
     state: ReportEditorStore.State.Content,
-    onReportNameChanged: (String) -> Unit = {},
-    onReportYearChanged: (String) -> Unit = {},
-    onReportAuthorsChanged: (String) -> Unit = {},
-    onReportWorkTypeChanged: (String) -> Unit = {},
-    onReportDistrictsChanged: (String) -> Unit = {},
-    onReportKeywordsChanged: (String) -> Unit = {}
-){
+    onReportNameChanged: (String) -> Unit,
+    onReportYearChanged: (String) -> Unit,
+    onReportWorkTypeChanged: (String) -> Unit,
+    onAddAuthor: (String) -> Unit,
+    onRemoveAuthor: (String) -> Unit,
+    onAddDistrict: (String) -> Unit,
+    onRemoveDistrict: (String) -> Unit,
+    onAddKeyword: (String) -> Unit,
+    onRemoveKeyword: (String) -> Unit,
+) {
     OutlinedTextField(
         value = state.name,
         onValueChange = onReportNameChanged,
@@ -126,25 +152,13 @@ private fun MetadataSection(
     Spacer(modifier = Modifier.height(8.dp))
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        OutlinedTextField(
-            value = state.year,
-            onValueChange = onReportYearChanged,
-            label = { Text(stringResource(Res.string.editor_field_year_placeholder)) },
-            singleLine = true,
-            modifier = Modifier.width(120.dp),
+        YearDropdown(
+            selectedYear = state.year,
+            onYearSelected = onReportYearChanged,
+            modifier = Modifier.width(180.dp),
         )
-        OutlinedTextField(
-            value = state.authors,
-            onValueChange = onReportAuthorsChanged,
-            label = { Text(stringResource(Res.string.editor_field_authors_placeholder)) },
-            singleLine = true,
-            modifier = Modifier.weight(1f),
-        )
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
             value = state.workType,
             onValueChange = onReportWorkTypeChanged,
@@ -152,23 +166,163 @@ private fun MetadataSection(
             singleLine = true,
             modifier = Modifier.weight(1f),
         )
-        OutlinedTextField(
-            value = state.districts,
-            onValueChange = onReportDistrictsChanged,
-            label = { Text(stringResource(Res.string.editor_field_districts_placeholder)) },
-            singleLine = true,
-            modifier = Modifier.weight(1f),
-        )
     }
     Spacer(modifier = Modifier.height(8.dp))
-    OutlinedTextField(
-        value = state.keywords,
-        onValueChange = onReportKeywordsChanged,
-        label = { Text(stringResource(Res.string.editor_field_keywords_placeholder)) },
-        minLines = 2,
-        maxLines = 4,
-        modifier = Modifier.fillMaxWidth(),
+    ChipInputField(
+        label = stringResource(Res.string.editor_field_authors_label),
+        placeholder = stringResource(Res.string.editor_field_authors_input_placeholder),
+        chips = state.authors,
+        onAdd = onAddAuthor,
+        onRemove = onRemoveAuthor,
     )
+    Spacer(modifier = Modifier.height(8.dp))
+    ChipInputField(
+        label = stringResource(Res.string.editor_field_districts_label),
+        placeholder = stringResource(Res.string.editor_field_districts_input_placeholder),
+        chips = state.districts,
+        onAdd = onAddDistrict,
+        onRemove = onRemoveDistrict,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    ChipInputField(
+        label = stringResource(Res.string.editor_field_keywords_label),
+        placeholder = stringResource(Res.string.editor_field_keywords_input_placeholder),
+        chips = state.keywords,
+        onAdd = onAddKeyword,
+        onRemove = onRemoveKeyword,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun YearDropdown(
+    selectedYear: String,
+    onYearSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var filterText by remember(selectedYear) { mutableStateOf(selectedYear) }
+    val filteredYears = remember(filterText) {
+        if (filterText.isBlank()) YEAR_RANGE
+        else YEAR_RANGE.filter { it.contains(filterText) }
+    }
+    ExposedDropdownMenuBox(
+        expanded = isExpanded,
+        onExpandedChange = { isExpanded = it },
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = filterText,
+            onValueChange = { value ->
+                filterText = value.filter { it.isDigit() }
+                if (!isExpanded) isExpanded = true
+            },
+            label = { Text(stringResource(Res.string.editor_field_year_placeholder)) },
+            singleLine = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isExpanded) },
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                .fillMaxWidth(),
+        )
+        ExposedDropdownMenu(
+            expanded = isExpanded,
+            onDismissRequest = {
+                isExpanded = false
+                filterText = selectedYear
+            },
+        ) {
+            filteredYears.forEach { year ->
+                DropdownMenuItem(
+                    text = { Text(year) },
+                    onClick = {
+                        onYearSelected(year)
+                        filterText = year
+                        isExpanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ChipInputField(
+    label: String,
+    placeholder: String,
+    chips: List<String>,
+    onAdd: (String) -> Unit,
+    onRemove: (String) -> Unit,
+) {
+    var inputText by remember { mutableStateOf("") }
+    val commitChip = {
+        val trimmed = inputText.trim()
+        if (trimmed.isNotEmpty() && trimmed !in chips) {
+            onAdd(trimmed)
+            inputText = ""
+        }
+    }
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        if (chips.isNotEmpty()) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                chips.forEach { chip ->
+                    InputChip(
+                        selected = false,
+                        onClick = { onRemove(chip) },
+                        label = { Text(chip) },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = CloseIcon,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        },
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                value = inputText,
+                onValueChange = { inputText = it },
+                placeholder = { Text(placeholder) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { commitChip() }),
+                modifier = Modifier
+                    .weight(1f)
+                    .onKeyEvent { event ->
+                        if (event.key == Key.Enter) {
+                            commitChip()
+                            true
+                        } else {
+                            false
+                        }
+                    },
+            )
+            OutlinedButton(
+                onClick = { commitChip() },
+                enabled = inputText.isNotBlank(),
+            ) {
+                Text(stringResource(Res.string.editor_chip_action_add))
+            }
+        }
+    }
 }
 
 @Composable
@@ -178,7 +332,10 @@ private fun MonumentsSection(
     onItemRemove: (Int) -> Unit,
     onAddMonument: () -> Unit
 ) {
-    Text(text = "Памятники", style = MaterialTheme.typography.titleMedium)
+    Text(
+        text = stringResource(Res.string.editor_section_monument_title),
+        style = MaterialTheme.typography.titleMedium,
+    )
     Spacer(modifier = Modifier.height(8.dp))
     items.forEachIndexed { index, monument ->
         MonumentRow(
@@ -189,10 +346,9 @@ private fun MonumentsSection(
         Spacer(modifier = Modifier.height(8.dp))
     }
     OutlinedButton(onClick = onAddMonument) {
-        Text("+ Добавить памятник")
+        Text(stringResource(Res.string.editor_monument_action_add))
     }
 }
-
 
 @Composable
 private fun MonumentRow(
@@ -213,21 +369,21 @@ private fun MonumentRow(
             OutlinedTextField(
                 value = monument.name.value,
                 onValueChange = { onUpdate(monument.copy(name = MonumentName(it))) },
-                label = { Text("Название *") },
+                label = { Text(stringResource(Res.string.editor_monument_field_name)) },
                 singleLine = true,
                 modifier = Modifier.weight(2f),
             )
             OutlinedTextField(
                 value = monument.type.value,
                 onValueChange = { onUpdate(monument.copy(type = MonumentType(it))) },
-                label = { Text("Тип") },
+                label = { Text(stringResource(Res.string.editor_monument_field_type)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
             OutlinedTextField(
                 value = monument.culture.value,
                 onValueChange = { onUpdate(monument.copy(culture = MonumentCulture(it))) },
-                label = { Text("Культура") },
+                label = { Text(stringResource(Res.string.editor_monument_field_culture)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
@@ -240,26 +396,29 @@ private fun MonumentRow(
             OutlinedTextField(
                 value = monument.period.value,
                 onValueChange = { onUpdate(monument.copy(period = MonumentPeriod(it))) },
-                label = { Text("Период") },
+                label = { Text(stringResource(Res.string.editor_monument_field_period)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
             OutlinedTextField(
                 value = monument.geographicLocation.value,
                 onValueChange = { onUpdate(monument.copy(geographicLocation = MonumentLocation(it))) },
-                label = { Text("Расположение") },
+                label = { Text(stringResource(Res.string.editor_monument_field_location)) },
                 singleLine = true,
                 modifier = Modifier.weight(1.5f),
             )
             OutlinedTextField(
                 value = monument.number.value,
                 onValueChange = { onUpdate(monument.copy(number = MonumentNumber(it))) },
-                label = { Text("№") },
+                label = { Text(stringResource(Res.string.editor_monument_field_number)) },
                 singleLine = true,
                 modifier = Modifier.weight(0.5f),
             )
             TextButton(onClick = onRemove) {
-                Text("Удалить", color = MaterialTheme.colorScheme.error)
+                Text(
+                    text = stringResource(Res.string.editor_monument_action_remove),
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }
@@ -276,10 +435,13 @@ private fun ActionButtons(
             onClick = onSave,
             enabled = !isSaving,
         ) {
-            Text(if (isSaving) "Сохранение..." else "Сохранить")
+            Text(
+                if (isSaving) stringResource(Res.string.editor_action_saving)
+                else stringResource(Res.string.editor_action_save)
+            )
         }
         OutlinedButton(onClick = onCancel) {
-            Text("Отмена")
+            Text(stringResource(Res.string.editor_action_cancel))
         }
     }
 }

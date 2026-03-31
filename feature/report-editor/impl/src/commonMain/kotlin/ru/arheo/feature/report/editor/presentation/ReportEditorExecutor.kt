@@ -14,13 +14,10 @@ internal class ReportEditorExecutor(
 
     override fun executeAction(action: ReportEditorAction) {
         when (action) {
-            is ReportEditorAction.ReportLoaded -> {
+            is ReportEditorAction.ReportLoaded ->
                 dispatch(ReportEditorPatch.ReportLoaded(action.report))
-//                originalArchivePath = action.report.archiveFilePath
-//                dispatch(ReportEditorPatch.ReportLoaded(action.report))
-//                publish(ReportEditorStore.Label.ArchivePathLoaded(action.report.archiveFilePath))
-            }
-            ReportEditorAction.ReportLoadError -> dispatch(ReportEditorPatch.ReportLoadError)
+            ReportEditorAction.ReportLoadError ->
+                dispatch(ReportEditorPatch.ReportLoadError)
         }
     }
 
@@ -30,67 +27,37 @@ internal class ReportEditorExecutor(
                 dispatch(ReportEditorPatch.NameChanged(intent.name))
             is ReportEditorStore.Intent.UpdateYear ->
                 dispatch(ReportEditorPatch.YearChanged(intent.year))
-            is ReportEditorStore.Intent.UpdateAuthors ->
-                dispatch(ReportEditorPatch.AuthorsChanged(intent.authors))
             is ReportEditorStore.Intent.UpdateWorkType ->
                 dispatch(ReportEditorPatch.WorkTypeChanged(intent.workType))
-            is ReportEditorStore.Intent.UpdateDistricts ->
-                dispatch(ReportEditorPatch.DistrictsChanged(intent.districts))
-            is ReportEditorStore.Intent.UpdateKeywords ->
-                dispatch(ReportEditorPatch.KeywordsChanged(intent.keywords))
+            is ReportEditorStore.Intent.AddAuthor ->
+                dispatch(ReportEditorPatch.AuthorAdded(intent.author))
+            is ReportEditorStore.Intent.RemoveAuthor ->
+                dispatch(ReportEditorPatch.AuthorRemoved(intent.author))
+            is ReportEditorStore.Intent.AddDistrict ->
+                dispatch(ReportEditorPatch.DistrictAdded(intent.district))
+            is ReportEditorStore.Intent.RemoveDistrict ->
+                dispatch(ReportEditorPatch.DistrictRemoved(intent.district))
+            is ReportEditorStore.Intent.AddKeyword ->
+                dispatch(ReportEditorPatch.KeywordAdded(intent.keyword))
+            is ReportEditorStore.Intent.RemoveKeyword ->
+                dispatch(ReportEditorPatch.KeywordRemoved(intent.keyword))
             is ReportEditorStore.Intent.UpdateMonument ->
                 dispatch(ReportEditorPatch.MonumentUpdated(intent.index, intent.monument))
             is ReportEditorStore.Intent.AddMonument ->
                 dispatch(ReportEditorPatch.MonumentAdded)
             is ReportEditorStore.Intent.RemoveMonument ->
                 dispatch(ReportEditorPatch.MonumentRemoved(intent.index))
-            is ReportEditorStore.Intent.Save -> handleSave(intent.workingDirectory, intent.hasFiles)
+            is ReportEditorStore.Intent.Save ->
+                handleSave(intent.workingDirectory, intent.hasFiles)
         }
     }
 
     private fun handleSave(workingDirectory: String, hasFiles: Boolean) {
         val currentState = state()
-//        val yearInt = currentState.year.toIntOrNull()
-//        if (currentState.name.isBlank()) {
-//            dispatch(ReportEditorPatch.Error("Название отчёта обязательно"))
-//            return
-//        }
-//        if (yearInt == null) {
-//            dispatch(ReportEditorPatch.Error("Укажите корректный год"))
-//            return
-//        }
-//        if (currentState.authors.isBlank()) {
-//            dispatch(ReportEditorPatch.Error("Укажите хотя бы одного автора"))
-//            return
-//        }
-//        dispatch(ReportEditorPatch.Saving)
-//        scope.launch {
-//            val report = buildReport(currentState, yearInt)
-//            val archivePath = archiveIfNeeded(workingDirectory, hasFiles, report)
-//            deleteStaleArchive(archivePath)
-//            val savedReport = report.copy(archiveFilePath = archivePath)
-//            if (currentState.isEditing) {
-//                reportRepository.updateReport(savedReport)
-//            } else {
-//                reportRepository.addReport(savedReport)
-//            }
-//            fileRepository.cleanupWorkingDirectory(workingDirectory)
-//            dispatch(ReportEditorPatch.Saved)
-//            publish(ReportEditorStore.Label.Saved)
-//        }
     }
 
     private fun buildReport(state: ReportEditorStore.State, year: Int): ReportData =
-        ReportData(
-//            id = state.reportId ?: 0L,
-//            title = state.title.trim(),
-//            year = year,
-//            authors = state.authors.split(",").map { it.trim() }.filter { it.isNotBlank() },
-//            workType = state.workType.trim(),
-//            districts = state.districts.split(",").map { it.trim() }.filter { it.isNotBlank() },
-//            keywords = state.keywords.split(",").map { it.trim() }.filter { it.isNotBlank() },
-//            monuments = state.monuments.filter { it.name.isNotBlank() },
-        )
+        ReportData()
 
     private suspend fun archiveIfNeeded(
         workingDirectory: String,

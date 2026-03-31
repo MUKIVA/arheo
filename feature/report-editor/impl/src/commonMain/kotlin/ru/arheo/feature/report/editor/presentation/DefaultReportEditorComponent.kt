@@ -2,10 +2,7 @@ package ru.arheo.feature.report.editor.presentation
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import ru.arheo.core.util.getStore
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
@@ -17,36 +14,13 @@ internal class DefaultReportEditorComponent(
     private val navigateBack: () -> Unit
 ) : ReportEditorComponent, ComponentContext by componentContext {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
-
     private val store: ReportEditorStore =
         instanceKeeper.getStore("ReportEditorStore") {
             reportEditorStoreFactory.create(reportId)
         }
 
-//    override val selectorComponent: ReportSelectorComponent =
-//        selectorFactory.create(componentContext)
-
     @OptIn(ExperimentalCoroutinesApi::class)
     override val state: StateFlow<ReportEditorStore.State> = store.stateFlow
-
-    init {
-//        lifecycle.subscribe(onDestroy = {
-//            coroutineScope.cancel()
-//            koinScope.close()
-//        })
-//        coroutineScope.launch {
-//            @OptIn(ExperimentalCoroutinesApi::class)
-//            store.labels.collect { label ->
-//                when (label) {
-//                    is ReportEditorStore.Label.Saved -> output(ReportEditorComponent.Output.Saved)
-//                    is ReportEditorStore.Label.ArchivePathLoaded -> {
-//                        label.archivePath?.let { selectorComponent.loadArchive(it) }
-//                    }
-//                }
-//            }
-//        }
-    }
 
     override fun onNameChanged(name: String) {
         store.accept(ReportEditorStore.Intent.UpdateName(name))
@@ -56,20 +30,32 @@ internal class DefaultReportEditorComponent(
         store.accept(ReportEditorStore.Intent.UpdateYear(year))
     }
 
-    override fun onAuthorsChanged(authors: String) {
-        store.accept(ReportEditorStore.Intent.UpdateAuthors(authors))
-    }
-
     override fun onWorkTypeChanged(workType: String) {
         store.accept(ReportEditorStore.Intent.UpdateWorkType(workType))
     }
 
-    override fun onDistrictsChanged(districts: String) {
-        store.accept(ReportEditorStore.Intent.UpdateDistricts(districts))
+    override fun onAddAuthor(author: String) {
+        store.accept(ReportEditorStore.Intent.AddAuthor(author))
     }
 
-    override fun onKeywordsChanged(keywords: String) {
-        store.accept(ReportEditorStore.Intent.UpdateKeywords(keywords))
+    override fun onRemoveAuthor(author: String) {
+        store.accept(ReportEditorStore.Intent.RemoveAuthor(author))
+    }
+
+    override fun onAddDistrict(district: String) {
+        store.accept(ReportEditorStore.Intent.AddDistrict(district))
+    }
+
+    override fun onRemoveDistrict(district: String) {
+        store.accept(ReportEditorStore.Intent.RemoveDistrict(district))
+    }
+
+    override fun onAddKeyword(keyword: String) {
+        store.accept(ReportEditorStore.Intent.AddKeyword(keyword))
+    }
+
+    override fun onRemoveKeyword(keyword: String) {
+        store.accept(ReportEditorStore.Intent.RemoveKeyword(keyword))
     }
 
     override fun onUpdateMonument(index: Int, monument: UiMonument) {
@@ -85,13 +71,6 @@ internal class DefaultReportEditorComponent(
     }
 
     override fun onSave() {
-//        val selectorState = selectorComponent.state.value
-//        store.accept(
-//            ReportEditorStore.Intent.Save(
-//                workingDirectory = selectorState.workingDirectory,
-//                hasFiles = selectorState.hasFiles,
-//            )
-//        )
         navigateBack()
     }
 

@@ -33,10 +33,13 @@ internal fun ReportEditorRoot(
                 },
                 onReportNameChanged      = component::onNameChanged,
                 onReportYearChanged      = component::onYearChanged,
-                onReportAuthorsChanged   = component::onAuthorsChanged,
                 onReportWorkTypeChanged  = component::onWorkTypeChanged,
-                onReportDistrictsChanged = component::onDistrictsChanged,
-                onReportKeywordsChanged  = component::onKeywordsChanged,
+                onAddAuthor              = component::onAddAuthor,
+                onRemoveAuthor           = component::onRemoveAuthor,
+                onAddDistrict            = component::onAddDistrict,
+                onRemoveDistrict         = component::onRemoveDistrict,
+                onAddKeyword             = component::onAddKeyword,
+                onRemoveKeyword          = component::onRemoveKeyword,
                 onMonumentItemUpdate     = component::onUpdateMonument,
                 onMonumentItemRemove     = component::onRemoveMonument,
                 onMonumentItemAdd        = component::onAddMonument,
@@ -48,6 +51,5 @@ internal fun ReportEditorRoot(
             ReportEditorLoading(modifier)
         is ReportEditorStore.State.Error ->
             ReportEditorError(modifier)
-
     }
 }

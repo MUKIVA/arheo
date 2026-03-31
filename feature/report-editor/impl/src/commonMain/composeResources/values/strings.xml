@@ -4,10 +4,28 @@
 
     <string name="editor_field_name_placeholder">Название отчёта *</string>
     <string name="editor_field_year_placeholder">Год *</string>
-    <string name="editor_field_authors_placeholder">Авторы * (через запятую)</string>
     <string name="editor_field_work_type_placeholder">Тип работ</string>
-    <string name="editor_field_districts_placeholder">Районы (через запятую)</string>
-    <string name="editor_field_keywords_placeholder">Ключевые слова (через запятую)</string>
+
+    <string name="editor_field_authors_label">Авторы *</string>
+    <string name="editor_field_authors_input_placeholder">Добавить автора</string>
+    <string name="editor_field_districts_label">Районы</string>
+    <string name="editor_field_districts_input_placeholder">Добавить район</string>
+    <string name="editor_field_keywords_label">Ключевые слова</string>
+    <string name="editor_field_keywords_input_placeholder">Добавить ключевое слово</string>
 
     <string name="editor_section_monument_title">Памятники</string>
+    <string name="editor_monument_field_name">Название *</string>
+    <string name="editor_monument_field_type">Тип</string>
+    <string name="editor_monument_field_culture">Культура</string>
+    <string name="editor_monument_field_period">Период</string>
+    <string name="editor_monument_field_location">Расположение</string>
+    <string name="editor_monument_field_number">№</string>
+    <string name="editor_monument_action_add">+ Добавить памятник</string>
+    <string name="editor_monument_action_remove">Удалить</string>
+
+    <string name="editor_chip_action_add">Добавить</string>
+
+    <string name="editor_action_save">Сохранить</string>
+    <string name="editor_action_saving">Сохранение…</string>
+    <string name="editor_action_cancel">Отмена</string>
 </resources>
