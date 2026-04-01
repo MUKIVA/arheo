@@ -32,7 +32,9 @@ internal class DefaultReportEditorComponent(
     override val state: StateFlow<ReportEditorStore.State> = store.stateFlow
 
     init {
-        lifecycle.subscribe(onDestroy = { coroutineScope.cancel() })
+        lifecycle.subscribe(
+            onDestroy = { coroutineScope.cancel() }
+        )
         coroutineScope.launch {
             @OptIn(ExperimentalCoroutinesApi::class)
             store.labels.collect { label ->

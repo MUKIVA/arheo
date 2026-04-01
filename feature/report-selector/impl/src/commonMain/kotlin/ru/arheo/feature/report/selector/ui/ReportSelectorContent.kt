@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -22,9 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draganddrop.DragAndDropEvent
-import androidx.compose.ui.draganddrop.DragAndDropTarget
-import androidx.compose.ui.draganddrop.awtTransferable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -49,8 +45,6 @@ import arheo.feature.report_selector.impl.generated.resources.selector_section_t
 import org.jetbrains.compose.resources.stringResource
 import ru.arheo.feature.report.selector.presentation.ReportSelectorStore
 import ru.arheo.feature.report.selector.presentation.models.UiFileInfo
-import java.awt.datatransfer.DataFlavor
-import java.io.File
 import javax.swing.JFileChooser
 
 @Composable
@@ -76,10 +70,16 @@ internal fun ReportSelectorContent(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { pickFiles(fileChooserTitle)?.let(onAttachFiles) }) {
+            OutlinedButton(
+                onClick = { pickFiles(fileChooserTitle)?.let(onAttachFiles) },
+                shape = MaterialTheme.shapes.large
+            ) {
                 Text(stringResource(Res.string.selector_action_add_files))
             }
-            OutlinedButton(onClick = { pickDirectory(directoryChooserTitle)?.let { onAttachFiles(listOf(it)) } }) {
+            OutlinedButton(
+                onClick = { pickDirectory(directoryChooserTitle)?.let { onAttachFiles(listOf(it)) } },
+                shape = MaterialTheme.shapes.large
+            ) {
                 Text(stringResource(Res.string.selector_action_add_directory))
             }
         }
@@ -115,27 +115,7 @@ private fun FileDropZone(
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     }
     val dragAndDropTarget = remember {
-        object : DragAndDropTarget {
-            override fun onStarted(event: DragAndDropEvent) {
-                onDragOver(true)
-            }
-            override fun onEnded(event: DragAndDropEvent) {
-                onDragOver(false)
-            }
-            override fun onDrop(event: DragAndDropEvent): Boolean {
-                val transferable = event.awtTransferable
-                if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                    @Suppress("UNCHECKED_CAST")
-                    val droppedFiles = transferable.getTransferData(DataFlavor.javaFileListFlavor) as List<File>
-                    val paths = droppedFiles.map { it.absolutePath }
-                    if (paths.isNotEmpty()) {
-                        onFilesDropped(paths)
-                        return true
-                    }
-                }
-                return false
-            }
-        }
+        DefaultDragDropTarget(onDragOver, onFilesDropped)
     }
     val dropZoneText = if (isDraggingOver) {
         stringResource(Res.string.selector_drop_zone_active)
@@ -147,12 +127,12 @@ private fun FileDropZone(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(MaterialTheme.shapes.large)
             .background(backgroundColor)
             .drawBehind {
                 drawRoundRect(
                     color = borderColor,
-                    cornerRadius = CornerRadius(8.dp.toPx()),
+                    cornerRadius = CornerRadius(16.dp.toPx()),
                     style = Stroke(width = 2.dp.toPx(), pathEffect = dashPathEffect),
                 )
             }
@@ -183,7 +163,7 @@ private fun FileRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp)
-            .clip(RoundedCornerShape(4.dp))
+            .clip(shape = MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -205,7 +185,10 @@ private fun FileRow(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        TextButton(onClick = onRemove) {
+        TextButton(
+            onClick = onRemove,
+            shape = MaterialTheme.shapes.large
+        ) {
             Text(
                 text = stringResource(Res.string.selector_action_remove),
                 color = MaterialTheme.colorScheme.error,

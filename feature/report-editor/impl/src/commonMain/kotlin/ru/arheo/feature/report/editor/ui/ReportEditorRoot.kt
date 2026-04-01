@@ -22,7 +22,6 @@ internal fun ReportEditorRoot(
     component: ReportEditorComponent = koinInject(),
 ) {
     val state by component.state.collectAsState()
-    val scrollState = rememberScrollState()
 
     var selectorWorkingDir by remember { mutableStateOf("") }
     var selectorHasFiles by remember { mutableStateOf(false) }
@@ -58,7 +57,7 @@ internal fun ReportEditorRoot(
                     component.onSave(selectorWorkingDir, selectorHasFiles)
                 },
                 onCancel                 = component::onCancel,
-                modifier = modifier.verticalScroll(scrollState)
+                modifier = modifier
             )
         is ReportEditorStore.State.Loading ->
             ReportEditorLoading(modifier)

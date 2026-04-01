@@ -1,4 +1,5 @@
 <resources>
+    <string name="screen_name">Список отчетов</string>
     <string name="table_title_report_name">Название отчёта</string>
     <string name="table_title_report_authors">Автор(ы)</string>
     <string name="table_title_year">Год</string>

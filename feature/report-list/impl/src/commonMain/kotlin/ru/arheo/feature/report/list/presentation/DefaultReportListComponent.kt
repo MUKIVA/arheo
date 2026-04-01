@@ -1,6 +1,7 @@
 package ru.arheo.feature.report.list.presentation
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,6 @@ internal class DefaultReportListComponent(
     init {
 //        lifecycle.subscribe(
 //            onResume = { store.accept(ReportListStore.Intent.Refresh) },
-//            onDestroy = { koinScope.close() },
 //        )
     }
 

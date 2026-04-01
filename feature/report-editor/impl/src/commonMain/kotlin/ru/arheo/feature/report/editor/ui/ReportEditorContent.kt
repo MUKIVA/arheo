@@ -1,6 +1,8 @@
 package ru.arheo.feature.report.editor.ui
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -11,11 +13,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -23,10 +29,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.FloatingToolbarState
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -55,6 +66,7 @@ private val YEAR_RANGE: List<String> by lazy {
     (Year.now().value downTo 1950).map { it.toString() }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ReportEditorContent(
     state: ReportEditorStore.State.Content,
@@ -73,58 +85,84 @@ internal fun ReportEditorContent(
     onMonumentItemRemove: (Int) -> Unit = {},
     onMonumentItemAdd: () -> Unit = {},
     onSaveReport: () -> Unit = {},
-    onCancel: () -> Unit = {}
-) = Column(
-    modifier = modifier
-) {
+    onCancel: () -> Unit = {},
+    scrollState: ScrollState = rememberScrollState()
+) = Scaffold(
+    modifier = modifier,
+    topBar = {
+        TopAppBar(
+            title = { EditorTitle(state.isEditing) }
+        )
+    },
+    content = { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = paddingValues.calculateTopPadding())
+                .verticalScroll(scrollState)
+        ) {
+            if (state.error != null) {
+                Text(
+                    text = state.error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            MetadataSection(
+                state = state,
+                onReportNameChanged = onReportNameChanged,
+                onReportYearChanged = onReportYearChanged,
+                onReportWorkTypeChanged = onReportWorkTypeChanged,
+                onAddAuthor = onAddAuthor,
+                onRemoveAuthor = onRemoveAuthor,
+                onAddDistrict = onAddDistrict,
+                onRemoveDistrict = onRemoveDistrict,
+                onAddKeyword = onAddKeyword,
+                onRemoveKeyword = onRemoveKeyword,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
+            MonumentsSection(
+                items = state.monuments,
+                onItemUpdate = onMonumentItemUpdate,
+                onItemRemove = onMonumentItemRemove,
+                onAddMonument = onMonumentItemAdd,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
+            reportSelector()
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+        }
+    },
+    bottomBar = {
+        Box(
+            Modifier.fillMaxWidth().padding(bottom = 8.dp)
+        ) {
+            HorizontalFloatingToolbar(
+                expanded = true,
+                shape = MaterialTheme.shapes.large,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                ActionButtons(
+                    isSaving = state.isSaving,
+                    onSave = onSaveReport,
+                    onCancel = onCancel
+                )
+            }
+        }
+    }
+)
+
+@Composable
+private fun EditorTitle(isEditing: Boolean) {
     Text(
         text = when {
-            state.isEditing -> stringResource(Res.string.editor_title_edit)
-            else ->            stringResource(Res.string.editor_title_create)
-        },
-        style = MaterialTheme.typography.headlineMedium,
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-    if (state.error != null) {
-        Text(
-            text = state.error,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-    }
-    MetadataSection(
-        state = state,
-        onReportNameChanged = onReportNameChanged,
-        onReportYearChanged = onReportYearChanged,
-        onReportWorkTypeChanged = onReportWorkTypeChanged,
-        onAddAuthor = onAddAuthor,
-        onRemoveAuthor = onRemoveAuthor,
-        onAddDistrict = onAddDistrict,
-        onRemoveDistrict = onRemoveDistrict,
-        onAddKeyword = onAddKeyword,
-        onRemoveKeyword = onRemoveKeyword,
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    HorizontalDivider()
-    Spacer(modifier = Modifier.height(8.dp))
-    MonumentsSection(
-        items = state.monuments,
-        onItemUpdate = onMonumentItemUpdate,
-        onItemRemove = onMonumentItemRemove,
-        onAddMonument = onMonumentItemAdd,
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    HorizontalDivider()
-    Spacer(modifier = Modifier.height(8.dp))
-    reportSelector()
-    Spacer(modifier = Modifier.height(8.dp))
-    HorizontalDivider()
-    Spacer(modifier = Modifier.height(8.dp))
-    ActionButtons(
-        isSaving = state.isSaving,
-        onSave = onSaveReport,
-        onCancel = onCancel
+            isEditing -> stringResource(Res.string.editor_title_edit)
+            else      -> stringResource(Res.string.editor_title_create)
+        }
     )
 }
 
@@ -144,6 +182,7 @@ private fun MetadataSection(
 ) {
     OutlinedTextField(
         value = state.name,
+        shape = MaterialTheme.shapes.large,
         onValueChange = onReportNameChanged,
         label = { Text(stringResource(Res.string.editor_field_name_placeholder)) },
         singleLine = true,
@@ -161,6 +200,7 @@ private fun MetadataSection(
         )
         OutlinedTextField(
             value = state.workType,
+            shape = MaterialTheme.shapes.large,
             onValueChange = onReportWorkTypeChanged,
             label = { Text(stringResource(Res.string.editor_field_work_type_placeholder)) },
             singleLine = true,
@@ -213,6 +253,7 @@ private fun YearDropdown(
     ) {
         OutlinedTextField(
             value = filterText,
+            shape = MaterialTheme.shapes.large,
             onValueChange = { value ->
                 filterText = value.filter { it.isDigit() }
                 if (!isExpanded) isExpanded = true
@@ -299,6 +340,7 @@ private fun ChipInputField(
         ) {
             OutlinedTextField(
                 value = inputText,
+                shape = MaterialTheme.shapes.large,
                 onValueChange = { inputText = it },
                 placeholder = { Text(placeholder) },
                 singleLine = true,
@@ -317,6 +359,7 @@ private fun ChipInputField(
             )
             OutlinedButton(
                 onClick = { commitChip() },
+                shape = MaterialTheme.shapes.large,
                 enabled = inputText.isNotBlank(),
             ) {
                 Text(stringResource(Res.string.editor_chip_action_add))
@@ -345,7 +388,10 @@ private fun MonumentsSection(
         )
         Spacer(modifier = Modifier.height(8.dp))
     }
-    OutlinedButton(onClick = onAddMonument) {
+    OutlinedButton(
+        onClick = onAddMonument,
+        shape = MaterialTheme.shapes.large,
+    ) {
         Text(stringResource(Res.string.editor_monument_action_add))
     }
 }
@@ -414,7 +460,10 @@ private fun MonumentRow(
                 singleLine = true,
                 modifier = Modifier.weight(0.5f),
             )
-            TextButton(onClick = onRemove) {
+            TextButton(
+                onClick = onRemove,
+                shape = MaterialTheme.shapes.large,
+            ) {
                 Text(
                     text = stringResource(Res.string.editor_monument_action_remove),
                     color = MaterialTheme.colorScheme.error,
@@ -433,14 +482,18 @@ private fun ActionButtons(
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(
             onClick = onSave,
+            shape = MaterialTheme.shapes.large,
             enabled = !isSaving,
         ) {
             Text(
                 if (isSaving) stringResource(Res.string.editor_action_saving)
-                else stringResource(Res.string.editor_action_save)
+                else          stringResource(Res.string.editor_action_save)
             )
         }
-        OutlinedButton(onClick = onCancel) {
+        OutlinedButton(
+            onClick = onCancel,
+            shape = MaterialTheme.shapes.large,
+        ) {
             Text(stringResource(Res.string.editor_action_cancel))
         }
     }

@@ -2,6 +2,7 @@ package ru.arheo.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -30,7 +31,8 @@ fun RootContent(
                 onEditReport = instance.navigateEditReport,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .widthIn(max = 1200.dp)
+                    .padding(horizontal = 32.dp)
             )
             is RootComponent.Child.ReportEditor -> launcherReportEditorContent(
                 componentContext = instance.componentContext,
@@ -38,7 +40,9 @@ fun RootContent(
                 navigateBack = instance.navigateBack,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .widthIn(max = 1200.dp)
+                    .padding(horizontal = 32.dp),
+
             )
         }
     }

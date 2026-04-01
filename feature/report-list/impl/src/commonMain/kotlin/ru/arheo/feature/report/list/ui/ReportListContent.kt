@@ -1,8 +1,6 @@
 package ru.arheo.feature.report.list.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,27 +8,34 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import arheo.feature.report_list.impl.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
@@ -38,6 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 import ru.arheo.feature.report.list.presentation.ReportListStore
 import ru.arheo.feature.report.list.presentation.models.UiReport
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ReportListContent(
     state: ReportListStore.State.Content,
@@ -48,61 +54,68 @@ internal fun ReportListContent(
     onDeleteReportClick: (Long) -> Unit = {},
     onDeleteConfirm: () -> Unit = {},
     onDeleteDismiss: () -> Unit = {}
-) = Column(modifier = modifier) {
-    TopBar(
-        searchQuery = state.searchQuery,
-        onSearchQueryChanged = onSearchQueryChanged,
-        onAddClick = onAddReportClick,
-    )
-    Spacer(Modifier.height(8.dp))
-    ReportTable(
-        reports = state.reports,
-        onEditReport = onEditReportClick,
-        onDeleteReport = onDeleteReportClick,
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(16.dp))
-            .border(
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
-                shape = RoundedCornerShape(16.dp)
-            )
-    )
-    if (state.deletingReportId != null) {
-        DeleteConfirmationDialog(
-            onConfirm = onDeleteConfirm,
-            onDismiss = onDeleteDismiss,
-        )
-    }
-}
-
-@Composable
-private fun TopBar(
-    searchQuery: String,
-    modifier: Modifier = Modifier,
-    onSearchQueryChanged: (String) -> Unit = {},
-    onAddClick: () -> Unit = {},
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+) = Scaffold(
+    topBar = {
         OutlinedTextField(
-            value = searchQuery,
+            value = state.searchQuery,
+            shape = MaterialTheme.shapes.large,
             onValueChange = onSearchQueryChanged,
             label = { Text(stringResource(Res.string.query_label)) },
             singleLine = true,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.width(16.dp))
-        Button(onClick = onAddClick) {
-            Text(stringResource(Res.string.action_add_report))
+    },
+    content = { paddingValues ->
+        ReportTable(
+            reports = state.reports,
+            bottomPadding = paddingValues.calculateBottomPadding(),
+            onEditReport = onEditReportClick,
+            onDeleteReport = onDeleteReportClick,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 8.dp)
+                .padding(top = paddingValues.calculateTopPadding())
+                .clip(MaterialTheme.shapes.large.copy(
+                    bottomEnd = CornerSize(0.dp),
+                    bottomStart = CornerSize(0.dp)
+                ))
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+        )
+        if (state.deletingReportId != null) {
+            DeleteConfirmationDialog(
+                onConfirm = onDeleteConfirm,
+                onDismiss = onDeleteDismiss,
+            )
         }
-    }
-}
+    },
+    bottomBar = {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            HorizontalFloatingToolbar(
+                expanded = true,
+                shape = MaterialTheme.shapes.large,
+                colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
+                    toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp)
+            ) {
+                Button(
+                    onClick = onAddReportClick,
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Text(stringResource(Res.string.action_add_report))
+                }
+            }
+        }
+    },
+    modifier = modifier
+)
 
 @Composable
 private fun ReportTable(
     reports: List<UiReport>,
+    bottomPadding: Dp,
     modifier: Modifier = Modifier,
     onEditReport: (Long) -> Unit = {},
     onDeleteReport: (Long) -> Unit = {},
@@ -114,11 +127,11 @@ private fun ReportTable(
             .padding(horizontal = 16.dp, vertical = 12.dp)
     )
     HorizontalDivider(thickness = 2.dp)
-
     when {
         reports.isEmpty() -> ReportListEmptyView(Modifier.fillMaxSize())
         else -> ReportList(
             reports = reports,
+            bottomPadding = bottomPadding,
             modifier = Modifier.fillMaxSize(),
             onEditReport = onEditReport,
             onDeleteReport = onDeleteReport
@@ -143,6 +156,7 @@ private fun ReportListEmptyView(
 @Composable
 private fun ReportList(
     reports: List<UiReport>,
+    bottomPadding: Dp,
     modifier: Modifier = Modifier,
     onEditReport: (Long) -> Unit,
     onDeleteReport: (Long) -> Unit
@@ -155,6 +169,7 @@ private fun ReportList(
         )
         HorizontalDivider()
     }
+    item { Spacer(Modifier.size(bottomPadding)) }
 }
 @Composable
 private fun ReportTableHeader(
@@ -275,12 +290,18 @@ private fun DeleteConfirmationDialog(
         title = { Text(stringResource(Res.string.delete_alert_title)) },
         text = { Text(stringResource(Res.string.delete_alert_description)) },
         confirmButton = {
-            Button(onClick = onConfirm) {
+            Button(
+                onClick = onConfirm,
+                shape = MaterialTheme.shapes.large,
+            ) {
                 Text(stringResource(Res.string.delete_alert_confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                shape = MaterialTheme.shapes.large,
+            ) {
                 Text(stringResource(Res.string.delete_alert_dismiss))
             }
         },
