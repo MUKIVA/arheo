@@ -1,11 +1,18 @@
 package ru.arheo.feature.report.editor.presentation
 
 import com.arkivanov.decompose.ComponentContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import ru.arheo.feature.report.editor.presentation.models.SaveValidationError
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
 internal interface ReportEditorComponent : ComponentContext {
     val state: StateFlow<ReportEditorStore.State>
+    val events: Flow<Event>
+
+    sealed interface Event {
+        data class ShowValidationError(val error: SaveValidationError) : Event
+    }
 
     fun onNameChanged(name: String)
     fun onYearChanged(year: String)

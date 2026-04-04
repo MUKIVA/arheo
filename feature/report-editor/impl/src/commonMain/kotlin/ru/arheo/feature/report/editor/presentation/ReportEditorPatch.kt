@@ -19,6 +19,5 @@ internal sealed interface ReportEditorPatch {
     data object MonumentAdded : ReportEditorPatch
     data class MonumentRemoved(val index: Int) : ReportEditorPatch
     data object Saving : ReportEditorPatch
-    data class SaveError(val message: String) : ReportEditorPatch
-    data object Saved : ReportEditorPatch
+    data object SaveFinished : ReportEditorPatch
 }

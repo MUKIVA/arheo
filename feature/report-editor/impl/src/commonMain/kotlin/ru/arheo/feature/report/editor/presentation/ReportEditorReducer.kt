@@ -27,32 +27,26 @@ internal class ReportEditorReducer : Reducer<ReportEditorStore.State, ReportEdit
         state: ReportEditorStore.State.Content,
         patch: ReportEditorPatch
     ) = when (patch) {
-        is ReportEditorPatch.NameChanged -> state.copy(
-            name = patch.name, error = null
-        )
-        is ReportEditorPatch.YearChanged -> state.copy(
-            year = patch.year, error = null
-        )
-        is ReportEditorPatch.WorkTypeChanged -> state.copy(
-            workType = patch.workType, error = null
-        )
+        is ReportEditorPatch.NameChanged -> state.copy(name = patch.name)
+        is ReportEditorPatch.YearChanged -> state.copy(year = patch.year)
+        is ReportEditorPatch.WorkTypeChanged -> state.copy(workType = patch.workType)
         is ReportEditorPatch.AuthorAdded -> state.copy(
-            authors = state.authors + patch.author.trim(), error = null
+            authors = state.authors + patch.author.trim()
         )
         is ReportEditorPatch.AuthorRemoved -> state.copy(
-            authors = state.authors - patch.author, error = null
+            authors = state.authors - patch.author
         )
         is ReportEditorPatch.DistrictAdded -> state.copy(
-            districts = state.districts + patch.district.trim(), error = null
+            districts = state.districts + patch.district.trim()
         )
         is ReportEditorPatch.DistrictRemoved -> state.copy(
-            districts = state.districts - patch.district, error = null
+            districts = state.districts - patch.district
         )
         is ReportEditorPatch.KeywordAdded -> state.copy(
-            keywords = state.keywords + patch.keyword.trim(), error = null
+            keywords = state.keywords + patch.keyword.trim()
         )
         is ReportEditorPatch.KeywordRemoved -> state.copy(
-            keywords = state.keywords - patch.keyword, error = null
+            keywords = state.keywords - patch.keyword
         )
         is ReportEditorPatch.MonumentUpdated -> state.copy(
             monuments = state.monuments.toMutableList().apply {
@@ -67,15 +61,8 @@ internal class ReportEditorReducer : Reducer<ReportEditorStore.State, ReportEdit
         is ReportEditorPatch.MonumentAdded -> state.copy(
             monuments = state.monuments + UiMonument.default()
         )
-        is ReportEditorPatch.Saving -> state.copy(
-            isSaving = true, error = null
-        )
-        is ReportEditorPatch.SaveError -> state.copy(
-            isSaving = false, error = patch.message
-        )
-        is ReportEditorPatch.Saved -> state.copy(
-            isSaving = false
-        )
+        is ReportEditorPatch.Saving -> state.copy(isSaving = true)
+        is ReportEditorPatch.SaveFinished -> state.copy(isSaving = false)
         else -> state
     }
 

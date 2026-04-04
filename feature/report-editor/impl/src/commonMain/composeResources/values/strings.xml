@@ -8,10 +8,13 @@
 
     <string name="editor_field_authors_label">Авторы *</string>
     <string name="editor_field_authors_input_placeholder">Добавить автора</string>
+    <string name="editor_field_authors_empty">Авторы не добавлены</string>
     <string name="editor_field_districts_label">Районы</string>
     <string name="editor_field_districts_input_placeholder">Добавить район</string>
+    <string name="editor_field_districts_empty">Районы не добавлены</string>
     <string name="editor_field_keywords_label">Ключевые слова</string>
     <string name="editor_field_keywords_input_placeholder">Добавить ключевое слово</string>
+    <string name="editor_field_keywords_empty">Ключевые слова не добавлены</string>
 
     <string name="editor_section_monument_title">Памятники</string>
     <string name="editor_monument_field_name">Название *</string>
@@ -28,4 +31,9 @@
     <string name="editor_action_save">Сохранить</string>
     <string name="editor_action_saving">Сохранение…</string>
     <string name="editor_action_cancel">Отмена</string>
+
+    <string name="editor_error_empty_title">Укажите название отчёта</string>
+    <string name="editor_error_invalid_year">Укажите корректный год</string>
+    <string name="editor_error_no_authors">Добавьте хотя бы одного автора</string>
+    <string name="editor_error_save_failed">Не удалось сохранить отчёт</string>
 </resources>

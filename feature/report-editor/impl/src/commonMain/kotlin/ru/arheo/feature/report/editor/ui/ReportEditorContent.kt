@@ -1,160 +1,163 @@
 package ru.arheo.feature.report.editor.ui
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.FloatingToolbarState
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import arheo.feature.report_editor.impl.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
-import ru.arheo.feature.report.editor.domian.models.monument.MonumentCulture
-import ru.arheo.feature.report.editor.domian.models.monument.MonumentLocation
-import ru.arheo.feature.report.editor.domian.models.monument.MonumentName
-import ru.arheo.feature.report.editor.domian.models.monument.MonumentNumber
-import ru.arheo.feature.report.editor.domian.models.monument.MonumentPeriod
-import ru.arheo.feature.report.editor.domian.models.monument.MonumentType
+import ru.arheo.feature.report.editor.presentation.ReportEditorComponent
 import ru.arheo.feature.report.editor.presentation.ReportEditorStore
+import ru.arheo.feature.report.editor.presentation.models.SaveValidationError
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
+import ru.arheo.feature.report.editor.ui.component.ChipInputField
+import ru.arheo.feature.report.editor.ui.component.MonumentInputField
+import ru.arheo.feature.report.editor.ui.models.DynamicFieldState
+import ru.arheo.feature.report.editor.ui.static.DynamicFieldDefaults
+import ru.arheo.feature.report.selector.ReportSelectorFeatureLauncher
 import java.time.Year
 
 private val YEAR_RANGE: List<String> by lazy {
     (Year.now().value downTo 1950).map { it.toString() }
 }
 
+private val containerModifier: Modifier
+    @Composable get() = Modifier
+        .fillMaxWidth()
+        .background(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = MaterialTheme.shapes.large
+        )
+        .padding(16.dp)
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ReportEditorContent(
+    component: ReportEditorComponent,
     state: ReportEditorStore.State.Content,
-    reportSelector: @Composable () -> Unit,
+    reportSelector: ReportSelectorFeatureLauncher,
     modifier: Modifier = Modifier,
-    onReportNameChanged: (String) -> Unit = {},
-    onReportYearChanged: (String) -> Unit = {},
-    onReportWorkTypeChanged: (String) -> Unit = {},
-    onAddAuthor: (String) -> Unit = {},
-    onRemoveAuthor: (String) -> Unit = {},
-    onAddDistrict: (String) -> Unit = {},
-    onRemoveDistrict: (String) -> Unit = {},
-    onAddKeyword: (String) -> Unit = {},
-    onRemoveKeyword: (String) -> Unit = {},
-    onMonumentItemUpdate: (Int, UiMonument) -> Unit = { _, _ -> },
-    onMonumentItemRemove: (Int) -> Unit = {},
-    onMonumentItemAdd: () -> Unit = {},
-    onSaveReport: () -> Unit = {},
-    onCancel: () -> Unit = {},
-    scrollState: ScrollState = rememberScrollState()
-) = Scaffold(
-    modifier = modifier,
-    topBar = {
-        TopAppBar(
-            title = { EditorTitle(state.isEditing) }
-        )
-    },
-    content = { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = paddingValues.calculateTopPadding())
-                .verticalScroll(scrollState)
-        ) {
-            if (state.error != null) {
-                Text(
-                    text = state.error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            MetadataSection(
-                state = state,
-                onReportNameChanged = onReportNameChanged,
-                onReportYearChanged = onReportYearChanged,
-                onReportWorkTypeChanged = onReportWorkTypeChanged,
-                onAddAuthor = onAddAuthor,
-                onRemoveAuthor = onRemoveAuthor,
-                onAddDistrict = onAddDistrict,
-                onRemoveDistrict = onRemoveDistrict,
-                onAddKeyword = onAddKeyword,
-                onRemoveKeyword = onRemoveKeyword,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(8.dp))
-            MonumentsSection(
-                items = state.monuments,
-                onItemUpdate = onMonumentItemUpdate,
-                onItemRemove = onMonumentItemRemove,
-                onAddMonument = onMonumentItemAdd,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(8.dp))
-            reportSelector()
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
-        }
-    },
-    bottomBar = {
-        Box(
-            Modifier.fillMaxWidth().padding(bottom = 8.dp)
-        ) {
-            HorizontalFloatingToolbar(
-                expanded = true,
-                shape = MaterialTheme.shapes.large,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                ActionButtons(
-                    isSaving = state.isSaving,
-                    onSave = onSaveReport,
-                    onCancel = onCancel
-                )
+    scrollState: ScrollState = rememberScrollState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+) {
+    val selectorWorkingDir = remember { mutableStateOf("") }
+    val selectorHasFiles = remember { mutableStateOf(false) }
+
+    val errorMessages = rememberErrorMessages()
+    LaunchedEffect(component) {
+        component.events.collect { event ->
+            when (event) {
+                is ReportEditorComponent.Event.ShowValidationError ->
+                    snackbarHostState.showSnackbar(errorMessages.getValue(event.error))
             }
         }
     }
-)
+
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = { TopAppBar(title = { EditorTitle(state.isEditing) })
+        },
+        content = { paddingValues ->
+            val dynamicFields = DynamicFieldDefaults.rememberDynamicFields(component, state)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                StaticFields(
+                    state = state,
+                    onReportNameChanged = component::onNameChanged,
+                    onReportYearChanged = component::onYearChanged,
+                    onReportWorkTypeChanged = component::onWorkTypeChanged,
+                    modifier = containerModifier,
+                )
+                DynamicFields(
+                    fieldStateList = dynamicFields,
+                    modifier = containerModifier,
+                )
+                MonumentsSection(
+                    items = state.monuments,
+                    onItemUpdate = component::onUpdateMonument,
+                    onItemRemove = component::onRemoveMonument,
+                    onAddMonument = component::onAddMonument,
+                    modifier = containerModifier
+                )
+                reportSelector.launch(
+                    componentContext = component,
+                    modifier = containerModifier.fillMaxWidth(),
+                    archiveFilePath = state.archiveFilePath,
+                    onFileStateChanged = { workingDir, hasFiles ->
+                        selectorWorkingDir.value = workingDir
+                        selectorHasFiles.value = hasFiles
+                    },
+                )
+                Spacer(Modifier.fillMaxWidth().height(paddingValues.calculateBottomPadding()))
+            }
+        },
+        bottomBar = {
+            Box(
+                Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            ) {
+                HorizontalFloatingToolbar(
+                    expanded = true,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                ) {
+                    ActionButtons(
+                        isSaving = state.isSaving,
+                        onSave = {
+                            component.onSave(
+                                workingDirectory = selectorWorkingDir.value,
+                                hasFiles = selectorHasFiles.value
+                            )
+                        },
+                        onCancel = component::onCancel
+                    )
+                }
+            }
+        }
+    )
+}
 
 @Composable
 private fun EditorTitle(isEditing: Boolean) {
@@ -166,20 +169,34 @@ private fun EditorTitle(isEditing: Boolean) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MetadataSection(
+private fun DynamicFields(
+    fieldStateList: List<DynamicFieldState>,
+    modifier: Modifier = Modifier
+) = Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(16.dp)
+) {
+    fieldStateList.onEach { field ->
+        ChipInputField(
+            label = stringResource(field.labelRes),
+            placeholder = stringResource(field.placeholderRes),
+            emptyMessage = stringResource(field.emptyMessageRes),
+            chips = field.data.value,
+            onAdd = field.actions::onAdd,
+            onRemove = field.actions::onRemove
+        )
+    }
+}
+
+@Composable
+private fun StaticFields(
     state: ReportEditorStore.State.Content,
+    modifier: Modifier = Modifier,
     onReportNameChanged: (String) -> Unit,
     onReportYearChanged: (String) -> Unit,
-    onReportWorkTypeChanged: (String) -> Unit,
-    onAddAuthor: (String) -> Unit,
-    onRemoveAuthor: (String) -> Unit,
-    onAddDistrict: (String) -> Unit,
-    onRemoveDistrict: (String) -> Unit,
-    onAddKeyword: (String) -> Unit,
-    onRemoveKeyword: (String) -> Unit,
-) {
+    onReportWorkTypeChanged: (String) -> Unit
+) = Column(modifier) {
     OutlinedTextField(
         value = state.name,
         shape = MaterialTheme.shapes.large,
@@ -207,30 +224,6 @@ private fun MetadataSection(
             modifier = Modifier.weight(1f),
         )
     }
-    Spacer(modifier = Modifier.height(8.dp))
-    ChipInputField(
-        label = stringResource(Res.string.editor_field_authors_label),
-        placeholder = stringResource(Res.string.editor_field_authors_input_placeholder),
-        chips = state.authors,
-        onAdd = onAddAuthor,
-        onRemove = onRemoveAuthor,
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    ChipInputField(
-        label = stringResource(Res.string.editor_field_districts_label),
-        placeholder = stringResource(Res.string.editor_field_districts_input_placeholder),
-        chips = state.districts,
-        onAdd = onAddDistrict,
-        onRemove = onRemoveDistrict,
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    ChipInputField(
-        label = stringResource(Res.string.editor_field_keywords_label),
-        placeholder = stringResource(Res.string.editor_field_keywords_input_placeholder),
-        chips = state.keywords,
-        onAdd = onAddKeyword,
-        onRemove = onRemoveKeyword,
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -240,15 +233,15 @@ private fun YearDropdown(
     onYearSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
+    val isExpanded = remember { mutableStateOf(false) }
     var filterText by remember(selectedYear) { mutableStateOf(selectedYear) }
     val filteredYears = remember(filterText) {
         if (filterText.isBlank()) YEAR_RANGE
         else YEAR_RANGE.filter { it.contains(filterText) }
     }
     ExposedDropdownMenuBox(
-        expanded = isExpanded,
-        onExpandedChange = { isExpanded = it },
+        expanded = isExpanded.value,
+        onExpandedChange = { isExpanded.value = it },
         modifier = modifier,
     ) {
         OutlinedTextField(
@@ -256,19 +249,19 @@ private fun YearDropdown(
             shape = MaterialTheme.shapes.large,
             onValueChange = { value ->
                 filterText = value.filter { it.isDigit() }
-                if (!isExpanded) isExpanded = true
+                if (!isExpanded.value) isExpanded.value = true
             },
             label = { Text(stringResource(Res.string.editor_field_year_placeholder)) },
             singleLine = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isExpanded) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isExpanded.value) },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                 .fillMaxWidth(),
         )
         ExposedDropdownMenu(
-            expanded = isExpanded,
+            expanded = isExpanded.value,
             onDismissRequest = {
-                isExpanded = false
+                isExpanded.value = false
                 filterText = selectedYear
             },
         ) {
@@ -278,91 +271,10 @@ private fun YearDropdown(
                     onClick = {
                         onYearSelected(year)
                         filterText = year
-                        isExpanded = false
+                        isExpanded.value = false
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                 )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun ChipInputField(
-    label: String,
-    placeholder: String,
-    chips: List<String>,
-    onAdd: (String) -> Unit,
-    onRemove: (String) -> Unit,
-) {
-    var inputText by remember { mutableStateOf("") }
-    val commitChip = {
-        val trimmed = inputText.trim()
-        if (trimmed.isNotEmpty() && trimmed !in chips) {
-            onAdd(trimmed)
-            inputText = ""
-        }
-    }
-    Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        if (chips.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                chips.forEach { chip ->
-                    InputChip(
-                        selected = false,
-                        onClick = { onRemove(chip) },
-                        label = { Text(chip) },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = CloseIcon,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                            )
-                        },
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = inputText,
-                shape = MaterialTheme.shapes.large,
-                onValueChange = { inputText = it },
-                placeholder = { Text(placeholder) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { commitChip() }),
-                modifier = Modifier
-                    .weight(1f)
-                    .onKeyEvent { event ->
-                        if (event.key == Key.Enter) {
-                            commitChip()
-                            true
-                        } else {
-                            false
-                        }
-                    },
-            )
-            OutlinedButton(
-                onClick = { commitChip() },
-                shape = MaterialTheme.shapes.large,
-                enabled = inputText.isNotBlank(),
-            ) {
-                Text(stringResource(Res.string.editor_chip_action_add))
             }
         }
     }
@@ -373,20 +285,26 @@ private fun MonumentsSection(
     items: List<UiMonument>,
     onItemUpdate: (Int, UiMonument) -> Unit,
     onItemRemove: (Int) -> Unit,
-    onAddMonument: () -> Unit
+    onAddMonument: () -> Unit,
+    modifier: Modifier = Modifier
+) = Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(8.dp)
 ) {
     Text(
         text = stringResource(Res.string.editor_section_monument_title),
         style = MaterialTheme.typography.titleMedium,
     )
-    Spacer(modifier = Modifier.height(8.dp))
     items.forEachIndexed { index, monument ->
-        MonumentRow(
+        MonumentInputField(
             monument = monument,
             onUpdate = { item -> onItemUpdate(index, item) },
             onRemove = { onItemRemove(index) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surface)
         )
-        Spacer(modifier = Modifier.height(8.dp))
     }
     OutlinedButton(
         onClick = onAddMonument,
@@ -397,104 +315,42 @@ private fun MonumentsSection(
 }
 
 @Composable
-private fun MonumentRow(
-    monument: UiMonument,
-    onUpdate: (UiMonument) -> Unit,
-    onRemove: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = monument.name.value,
-                onValueChange = { onUpdate(monument.copy(name = MonumentName(it))) },
-                label = { Text(stringResource(Res.string.editor_monument_field_name)) },
-                singleLine = true,
-                modifier = Modifier.weight(2f),
-            )
-            OutlinedTextField(
-                value = monument.type.value,
-                onValueChange = { onUpdate(monument.copy(type = MonumentType(it))) },
-                label = { Text(stringResource(Res.string.editor_monument_field_type)) },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            OutlinedTextField(
-                value = monument.culture.value,
-                onValueChange = { onUpdate(monument.copy(culture = MonumentCulture(it))) },
-                label = { Text(stringResource(Res.string.editor_monument_field_culture)) },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = monument.period.value,
-                onValueChange = { onUpdate(monument.copy(period = MonumentPeriod(it))) },
-                label = { Text(stringResource(Res.string.editor_monument_field_period)) },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            OutlinedTextField(
-                value = monument.geographicLocation.value,
-                onValueChange = { onUpdate(monument.copy(geographicLocation = MonumentLocation(it))) },
-                label = { Text(stringResource(Res.string.editor_monument_field_location)) },
-                singleLine = true,
-                modifier = Modifier.weight(1.5f),
-            )
-            OutlinedTextField(
-                value = monument.number.value,
-                onValueChange = { onUpdate(monument.copy(number = MonumentNumber(it))) },
-                label = { Text(stringResource(Res.string.editor_monument_field_number)) },
-                singleLine = true,
-                modifier = Modifier.weight(0.5f),
-            )
-            TextButton(
-                onClick = onRemove,
-                shape = MaterialTheme.shapes.large,
-            ) {
-                Text(
-                    text = stringResource(Res.string.editor_monument_action_remove),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun ActionButtons(
     isSaving: Boolean,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(
-            onClick = onSave,
-            shape = MaterialTheme.shapes.large,
-            enabled = !isSaving,
-        ) {
-            Text(
-                if (isSaving) stringResource(Res.string.editor_action_saving)
-                else          stringResource(Res.string.editor_action_save)
-            )
-        }
-        OutlinedButton(
-            onClick = onCancel,
-            shape = MaterialTheme.shapes.large,
-        ) {
-            Text(stringResource(Res.string.editor_action_cancel))
-        }
+    Button(
+        onClick = onSave,
+        shape = MaterialTheme.shapes.large,
+        enabled = !isSaving,
+    ) {
+        Text(
+            if (isSaving) stringResource(Res.string.editor_action_saving)
+            else          stringResource(Res.string.editor_action_save)
+        )
+    }
+    Spacer(Modifier.width(8.dp))
+    OutlinedButton(
+        onClick = onCancel,
+        shape = MaterialTheme.shapes.large,
+    ) {
+        Text(stringResource(Res.string.editor_action_cancel))
+    }
+}
+
+@Composable
+private fun rememberErrorMessages(): Map<SaveValidationError, String> {
+    val emptyTitle = stringResource(Res.string.editor_error_empty_title)
+    val invalidYear = stringResource(Res.string.editor_error_invalid_year)
+    val noAuthors = stringResource(Res.string.editor_error_no_authors)
+    val saveFailed = stringResource(Res.string.editor_error_save_failed)
+    return remember {
+        mapOf(
+            SaveValidationError.EMPTY_TITLE to emptyTitle,
+            SaveValidationError.INVALID_YEAR to invalidYear,
+            SaveValidationError.NO_AUTHORS to noAuthors,
+            SaveValidationError.SAVE_FAILED to saveFailed,
+        )
     }
 }

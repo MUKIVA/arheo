@@ -9,7 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import ru.arheo.core.util.getStore
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
@@ -28,19 +31,23 @@ internal class DefaultReportEditorComponent(
             reportEditorStoreFactory.create(reportId)
         }
 
+    private val mutableEvents = MutableSharedFlow<ReportEditorComponent.Event>()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override val state: StateFlow<ReportEditorStore.State> = store.stateFlow
 
+    override val events: Flow<ReportEditorComponent.Event> = mutableEvents.asSharedFlow()
+
     init {
-        lifecycle.subscribe(
-            onDestroy = { coroutineScope.cancel() }
-        )
+        lifecycle.subscribe(onDestroy = { coroutineScope.cancel() })
         coroutineScope.launch {
             @OptIn(ExperimentalCoroutinesApi::class)
             store.labels.collect { label ->
                 when (label) {
-                    is ReportEditorStore.Label.Saved -> navigateBack()
-                    is ReportEditorStore.Label.ArchivePathLoaded -> Unit
+                    is ReportEditorStore.Label.Saved ->
+                        navigateBack()
+                    is ReportEditorStore.Label.SaveError ->
+                        mutableEvents.emit(ReportEditorComponent.Event.ShowValidationError(label.error))
                 }
             }
         }

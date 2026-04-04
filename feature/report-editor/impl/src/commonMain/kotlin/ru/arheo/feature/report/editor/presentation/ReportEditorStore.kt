@@ -3,6 +3,7 @@ package ru.arheo.feature.report.editor.presentation
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.arkivanov.mvikotlin.core.store.Store
+import ru.arheo.feature.report.editor.presentation.models.SaveValidationError
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
 internal class ReportEditorStore(
@@ -49,7 +50,6 @@ internal class ReportEditorStore(
             val monuments: List<UiMonument> = emptyList(),
             val archiveFilePath: String? = null,
             val isSaving: Boolean = false,
-            val error: String? = null,
         ) : State {
             val isEditing: Boolean get() = reportId != null
         }
@@ -57,6 +57,6 @@ internal class ReportEditorStore(
 
     sealed interface Label {
         data object Saved : Label
-        data class ArchivePathLoaded(val archivePath: String?) : Label
+        data class SaveError(val error: SaveValidationError) : Label
     }
 }

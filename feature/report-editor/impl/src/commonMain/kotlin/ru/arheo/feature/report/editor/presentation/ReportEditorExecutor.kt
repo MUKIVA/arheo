@@ -15,6 +15,7 @@ import ru.arheo.feature.report.editor.domian.models.report.ReportId
 import ru.arheo.feature.report.editor.domian.models.report.ReportName
 import ru.arheo.feature.report.editor.domian.models.report.ReportWorkType
 import ru.arheo.feature.report.editor.domian.models.report.ReportYear
+import ru.arheo.feature.report.editor.presentation.models.SaveValidationError
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
 internal class ReportEditorExecutor(
@@ -70,15 +71,15 @@ internal class ReportEditorExecutor(
         val content = state() as? ReportEditorStore.State.Content ?: return
         val yearInt = content.year.toIntOrNull()
         if (content.name.isBlank()) {
-            dispatch(ReportEditorPatch.SaveError("Название отчёта обязательно"))
+            publish(ReportEditorStore.Label.SaveError(SaveValidationError.EMPTY_TITLE))
             return
         }
         if (yearInt == null) {
-            dispatch(ReportEditorPatch.SaveError("Укажите корректный год"))
+            publish(ReportEditorStore.Label.SaveError(SaveValidationError.INVALID_YEAR))
             return
         }
         if (content.authors.isEmpty()) {
-            dispatch(ReportEditorPatch.SaveError("Укажите хотя бы одного автора"))
+            publish(ReportEditorStore.Label.SaveError(SaveValidationError.NO_AUTHORS))
             return
         }
         dispatch(ReportEditorPatch.Saving)
@@ -97,10 +98,11 @@ internal class ReportEditorExecutor(
                 if (workingDirectory.isNotEmpty()) {
                     fileRepository.cleanupWorkingDirectory(workingDirectory)
                 }
-                dispatch(ReportEditorPatch.Saved)
+                dispatch(ReportEditorPatch.SaveFinished)
                 publish(ReportEditorStore.Label.Saved)
-            } catch (e: Exception) {
-                dispatch(ReportEditorPatch.SaveError(e.message ?: "Ошибка сохранения"))
+            } catch (_: Exception) {
+                dispatch(ReportEditorPatch.SaveFinished)
+                publish(ReportEditorStore.Label.SaveError(SaveValidationError.SAVE_FAILED))
             }
         }
     }
