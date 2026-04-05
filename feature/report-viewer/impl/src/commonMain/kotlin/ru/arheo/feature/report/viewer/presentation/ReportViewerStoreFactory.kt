@@ -1,10 +1,13 @@
 package ru.arheo.feature.report.viewer.presentation
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import ru.arheo.feature.report.viewer.domain.ReportRepository
+import ru.arheo.feature.report.viewer.domain.models.ReportId
 
 internal class ReportViewerStoreFactory(
     private val storeFactory: StoreFactory,
-    private val reportId: Long
+    private val reportId: Long,
+    private val reportRepository: ReportRepository
 ) {
 
     fun create(): ReportViewerStore {
@@ -12,8 +15,16 @@ internal class ReportViewerStoreFactory(
             implementation = storeFactory.create(
                 name = STORE_NAME,
                 initialState = ReportViewerStore.State.Loading,
-                bootstrapper = ReportViewerBootstrapper(reportId),
-                executorFactory = { ReportViewerExecutor(reportId) },
+                bootstrapper = ReportViewerBootstrapper(
+                    reportId = ReportId(reportId),
+                    reportRepository = reportRepository
+                ),
+                executorFactory = {
+                    ReportViewerExecutor(
+                        reportId = ReportId(reportId),
+                        reportRepository = reportRepository
+                    )
+                },
                 reducer = ReportViewerReducer(),
             )
         )

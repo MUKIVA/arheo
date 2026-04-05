@@ -3,6 +3,7 @@ package ru.arheo.feature.report.viewer.presentation
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.arkivanov.mvikotlin.core.store.Store
+import ru.arheo.feature.report.viewer.domain.models.ReportId
 
 internal class ReportViewerStore(
     private val implementation: Store<Intent, State, Label>
@@ -22,7 +23,7 @@ internal class ReportViewerStore(
 
         @Immutable
         data class Content(
-            val reportId: Long
+            val reportId: ReportId
         ) : State
     }
 

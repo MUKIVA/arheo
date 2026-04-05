@@ -22,7 +22,7 @@ internal class ReportViewerReducer : Reducer<ReportViewerStore.State, ReportView
     ): ReportViewerStore.State {
         return when (patch) {
             is ReportViewerPatch.ReportWasLoaded -> ReportViewerStore.State.Content(
-                reportId = patch.reportId
+                reportId = patch.report.id
             )
             is ReportViewerPatch.FailToLoadReport -> ReportViewerStore.State.Error
             else -> state
