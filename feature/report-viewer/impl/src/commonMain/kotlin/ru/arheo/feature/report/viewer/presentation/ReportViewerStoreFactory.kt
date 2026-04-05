@@ -2,7 +2,7 @@ package ru.arheo.feature.report.viewer.presentation
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import ru.arheo.feature.report.viewer.domain.ReportRepository
-import ru.arheo.feature.report.viewer.domain.models.ReportId
+import ru.arheo.feature.report.viewer.domain.models.report.ReportId
 
 internal class ReportViewerStoreFactory(
     private val storeFactory: StoreFactory,

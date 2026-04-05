@@ -1,6 +1,9 @@
 package ru.arheo.feature.report.viewer.presentation
 
 import com.arkivanov.mvikotlin.core.store.Reducer
+import ru.arheo.feature.report.viewer.presentation.mappers.MonumentMapper
+import ru.arheo.feature.report.viewer.presentation.mappers.UiMapper
+import ru.arheo.feature.report.viewer.presentation.models.UiMonument
 
 internal class ReportViewerReducer : Reducer<ReportViewerStore.State, ReportViewerPatch> {
     override fun ReportViewerStore.State.reduce(
@@ -22,7 +25,10 @@ internal class ReportViewerReducer : Reducer<ReportViewerStore.State, ReportView
     ): ReportViewerStore.State {
         return when (patch) {
             is ReportViewerPatch.ReportWasLoaded -> ReportViewerStore.State.Content(
-                reportId = patch.report.id
+                report = UiMapper.from(patch.report).toUi(),
+                monuments = listOf(UiMonument.Header) + patch.report.monuments
+                    .map(UiMapper::from)
+                    .map(MonumentMapper::toUiContent)
             )
             is ReportViewerPatch.FailToLoadReport -> ReportViewerStore.State.Error
             else -> state

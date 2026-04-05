@@ -3,7 +3,7 @@ package ru.arheo.feature.report.viewer.presentation
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
 import ru.arheo.feature.report.viewer.domain.ReportRepository
-import ru.arheo.feature.report.viewer.domain.models.ReportId
+import ru.arheo.feature.report.viewer.domain.models.report.ReportId
 
 internal class ReportViewerExecutor(
     private val reportId: ReportId,

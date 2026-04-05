@@ -1,0 +1,20 @@
+<resources>
+    <string name="main_actions_back">Назад</string>
+
+    <string name="main_info_title">Главаня информация</string>
+    <string name="main_info_name_field">Название</string>
+    <string name="main_info_year_field">Год</string>
+    <string name="main_info_authors_field">Авторы</string>
+    <string name="main_info_work_type_field">Тип работы</string>
+    <string name="main_info_districts_field">Районы</string>
+    <string name="main_info_keywords_field">Ключевые слова</string>
+
+    <string name="monument_list_title">Памятники</string>
+    <string name="monument_list_empty_message">Памятники отсутствуют</string>
+    <string name="monument_list_item_name_field">Название</string>
+    <string name="monument_list_item_number_field">Номер</string>
+    <string name="monument_list_item_type_field">Тип</string>
+    <string name="monument_list_item_culture_field">Культура</string>
+    <string name="monument_list_item_period_field">Период</string>
+    <string name="monument_list_item_location_field">Локация</string>
+</resources>

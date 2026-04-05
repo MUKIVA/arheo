@@ -1,7 +1,7 @@
 package ru.arheo.feature.report.viewer.domain
 
-import ru.arheo.feature.report.viewer.domain.models.Report
-import ru.arheo.feature.report.viewer.domain.models.ReportId
+import ru.arheo.feature.report.viewer.domain.models.report.Report
+import ru.arheo.feature.report.viewer.domain.models.report.ReportId
 
 internal interface ReportRepository {
     suspend fun getReportById(id: ReportId): Report?

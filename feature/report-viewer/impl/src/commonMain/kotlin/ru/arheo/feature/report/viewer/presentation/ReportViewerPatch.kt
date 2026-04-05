@@ -1,6 +1,6 @@
 package ru.arheo.feature.report.viewer.presentation
 
-import ru.arheo.feature.report.viewer.domain.models.Report
+import ru.arheo.feature.report.viewer.domain.models.report.Report
 
 internal sealed interface ReportViewerPatch {
 

@@ -4,5 +4,11 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 internal data class UiReport(
-    val id: Long
+    val id: Long,
+    val name: String,
+    val year: Int,
+    val authors: String,
+    val workType: String,
+    val districts: String,
+    val keywords: String,
 )
