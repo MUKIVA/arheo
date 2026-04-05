@@ -1,9 +1,17 @@
 package ru.arheo.feature.report.list.presentation
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.launch
 import ru.arheo.core.util.getStore
 
 internal class DefaultReportListComponent(
@@ -13,8 +21,8 @@ internal class DefaultReportListComponent(
     private val navigateEditReport: (Long) -> Unit,
     private val navigateViewReport: (Long) -> Unit
 ) : ReportListComponent, ComponentContext by componentContext {
-
     init {
+
 //        lifecycle.subscribe(
 //            onResume = { store.accept(ReportListStore.Intent.Refresh) },
 //        )

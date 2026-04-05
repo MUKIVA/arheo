@@ -34,7 +34,6 @@ internal class ReportListReducer : Reducer<ReportListStore.State, ReportListPatc
             )
             is ReportListPatch.SearchQueryChanged -> state.copy(
                 searchQuery = patch.query,
-                reports = patch.filtered.asUiReports()
             )
             is ReportListPatch.RequestDelete -> state.copy(
                 deletingReportId = patch.reportId

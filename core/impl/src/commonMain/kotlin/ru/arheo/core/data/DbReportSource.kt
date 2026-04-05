@@ -5,9 +5,6 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.like
-import org.jetbrains.exposed.v1.core.lowerCase
-import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -38,13 +35,10 @@ internal class DbReportSource(
     }
 
     override suspend fun searchReports(query: String): List<ReportData> = dbQuery {
-        if (query.isBlank()) return@dbQuery loadAllReports()
-        val searchTerm = query.lowercase()
-        val pattern = "%$searchTerm%"
-        val matchingIds = findMatchingReportIds(pattern, searchTerm)
-        matchingIds
-            .mapNotNull { loadReportById(it) }
-            .sortedByDescending { it.year }
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return@dbQuery loadAllReports()
+        val queryLowercase = trimmed.lowercase()
+        loadAllReports().filter { report -> report.matchesSearch(queryLowercase) }
     }
 
     override suspend fun addReport(report: ReportData): ReportData = dbQuery {
@@ -173,32 +167,6 @@ internal class DbReportSource(
                 )
             }
 
-    private fun findMatchingReportIds(pattern: String, searchTerm: String): Set<Long> {
-        val ids = mutableSetOf<Long>()
-        ReportTable.selectAll().where {
-            (ReportTable.title.lowerCase() like pattern) or
-                (ReportTable.workType.lowerCase() like pattern)
-        }.forEach { ids.add(it[ReportTable.id].value) }
-        ReportTable.selectAll().forEach { row ->
-            if (row[ReportTable.year].toString().contains(searchTerm)) {
-                ids.add(row[ReportTable.id].value)
-            }
-        }
-        ReportAuthorTable.selectAll().where {
-            ReportAuthorTable.author.lowerCase() like pattern
-        }.forEach { ids.add(it[ReportAuthorTable.reportId]) }
-        ReportDistrictTable.selectAll().where {
-            ReportDistrictTable.district.lowerCase() like pattern
-        }.forEach { ids.add(it[ReportDistrictTable.reportId]) }
-        ReportKeywordTable.selectAll().where {
-            ReportKeywordTable.keyword.lowerCase() like pattern
-        }.forEach { ids.add(it[ReportKeywordTable.reportId]) }
-        MonumentTable.selectAll().where {
-            MonumentTable.name.lowerCase() like pattern
-        }.forEach { ids.add(it[MonumentTable.reportId]) }
-        return ids
-    }
-
     private fun insertRelatedData(reportId: Long, report: ReportData) {
         report.authors.forEach { author ->
             ReportAuthorTable.insert {
@@ -237,4 +205,57 @@ internal class DbReportSource(
         ReportKeywordTable.deleteWhere { ReportKeywordTable.reportId eq reportId }
         MonumentTable.deleteWhere { MonumentTable.reportId eq reportId }
     }
+}
+
+private fun ReportData.matchesSearch(queryLowercase: String): Boolean {
+    if (title.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    if (year.toString().contains(queryLowercase)) {
+        return true
+    }
+    if (workType.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    if (authors.any { author -> author.lowercase().contains(queryLowercase) }) {
+        return true
+    }
+    if (districts.any { district -> district.lowercase().contains(queryLowercase) }) {
+        return true
+    }
+    if (keywords.any { keyword -> keyword.lowercase().contains(queryLowercase) }) {
+        return true
+    }
+    if (monuments.any { monument -> monument.matchesSearch(queryLowercase) }) {
+        return true
+    }
+    if (reportFilePath?.lowercase()?.contains(queryLowercase) == true) {
+        return true
+    }
+    if (archiveFilePath?.lowercase()?.contains(queryLowercase) == true) {
+        return true
+    }
+    return false
+}
+
+private fun MonumentData.matchesSearch(queryLowercase: String): Boolean {
+    if (name.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    if (type.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    if (culture.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    if (period.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    if (geographicLocation.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    if (number.lowercase().contains(queryLowercase)) {
+        return true
+    }
+    return false
 }
