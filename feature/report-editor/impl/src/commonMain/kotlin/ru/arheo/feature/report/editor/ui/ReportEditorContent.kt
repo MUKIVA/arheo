@@ -3,8 +3,8 @@ package ru.arheo.feature.report.editor.ui
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -22,7 +22,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -36,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -92,8 +90,7 @@ internal fun ReportEditorContent(
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = { TopAppBar(title = { EditorTitle(state.isEditing) })
-        },
+        topBar = { TopAppBar(title = { EditorTitle(state.isEditing) }) },
         content = { paddingValues ->
             val dynamicFields = DynamicFieldDefaults.rememberDynamicFields(component, state)
 
@@ -104,6 +101,13 @@ internal fun ReportEditorContent(
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                ActionButtons(
+                    isSaving = state.isSaving,
+                    component = component,
+                    selectorWorkingDir = selectorWorkingDir.value,
+                    selectorHasFiles = selectorHasFiles.value,
+                    modifier = containerModifier
+                )
                 StaticFields(
                     state = state,
                     onReportNameChanged = component::onNameChanged,
@@ -132,28 +136,6 @@ internal fun ReportEditorContent(
                     },
                 )
                 Spacer(Modifier.fillMaxWidth().height(paddingValues.calculateBottomPadding()))
-            }
-        },
-        bottomBar = {
-            Box(
-                Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            ) {
-                HorizontalFloatingToolbar(
-                    expanded = true,
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                ) {
-                    ActionButtons(
-                        isSaving = state.isSaving,
-                        onSave = {
-                            component.onSave(
-                                workingDirectory = selectorWorkingDir.value,
-                                hasFiles = selectorHasFiles.value
-                            )
-                        },
-                        onCancel = component::onCancel
-                    )
-                }
             }
         }
     )
@@ -317,11 +299,21 @@ private fun MonumentsSection(
 @Composable
 private fun ActionButtons(
     isSaving: Boolean,
-    onSave: () -> Unit,
-    onCancel: () -> Unit
+    component: ReportEditorComponent,
+    selectorWorkingDir: String,
+    selectorHasFiles: Boolean,
+    modifier: Modifier = Modifier,
+) = FlowRow(
+    modifier = modifier,
+    horizontalArrangement = Arrangement.spacedBy(8.dp)
 ) {
     Button(
-        onClick = onSave,
+        onClick = {
+            component.onSave(
+                workingDirectory = selectorWorkingDir,
+                hasFiles = selectorHasFiles
+            )
+        },
         shape = MaterialTheme.shapes.large,
         enabled = !isSaving,
     ) {
@@ -330,9 +322,8 @@ private fun ActionButtons(
             else          stringResource(Res.string.editor_action_save)
         )
     }
-    Spacer(Modifier.width(8.dp))
     OutlinedButton(
-        onClick = onCancel,
+        onClick = component::onCancel,
         shape = MaterialTheme.shapes.large,
     ) {
         Text(stringResource(Res.string.editor_action_cancel))

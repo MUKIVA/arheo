@@ -19,14 +19,8 @@ internal fun ReportListRoot(
         ReportListStore.State.Loading -> ReportListLoading(modifier)
         is ReportListStore.State.Content -> ReportListContent(
             state = instance,
+            component = component,
             modifier = modifier,
-            onSearchQueryChanged = component::onSearchQueryChanged,
-            onAddReportClick     = component::onCreateReport,
-            onEditReportClick    = component::onEditReport,
-            onDeleteReportClick  = component::onRequestDeleteReport,
-            onDeleteConfirm      = component::onConfirmDeleteReport,
-            onDeleteDismiss      = component::onDismissDeleteReport,
-            onViewReport         = component::onOpenReport
         )
     }
 }
