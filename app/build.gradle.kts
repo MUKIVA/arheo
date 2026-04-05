@@ -54,6 +54,12 @@ compose.desktop {
     application {
         mainClass = "$internalPackageName.MainKt"
 
+        buildTypes.release {
+            proguard {
+                isEnabled.set(false)
+            }
+        }
+
         nativeDistributions {
             targetFormats(
                 TargetFormat.Dmg,
