@@ -1,6 +1,9 @@
 package ru.arheo
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -34,7 +37,13 @@ fun main() = runBlocking {
                 },
                 title = stringResource(Res.string.app_name),
                 state = rememberWindowState(width = 1200.dp, height = 800.dp),
-                content = { App(Modifier.fillMaxSize()) }
+                content = {
+                    App(
+                        modifier = Modifier.fillMaxSize()
+                            .widthIn(min = 800.dp)
+                            .heightIn(min = 600.dp)
+                    )
+                }
             )
         }
     }

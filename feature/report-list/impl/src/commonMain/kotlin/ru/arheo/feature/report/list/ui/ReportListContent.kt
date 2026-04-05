@@ -79,7 +79,7 @@ internal fun ReportListContent(
             )
         }
     },
-    modifier = modifier
+    modifier = modifier.padding(top = 16.dp)
 )
 
 @Composable
