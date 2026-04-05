@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import ru.arheo.core.domain.model.FileInfoData
 import ru.arheo.core.domain.model.ReportData
 import ru.arheo.core.data.util.AppPaths
+import ru.arheo.core.data.util.TarGzArchive
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -13,9 +14,6 @@ import java.util.Comparator
 import java.util.UUID
 
 internal class DefaultFileSource : FileSource {
-
-    private val isWindows: Boolean =
-        System.getProperty("os.name").lowercase().contains("win")
 
     override suspend fun createWorkingDirectory(): String = withContext(Dispatchers.IO) {
         val dir = AppPaths.resolveTmpDirectory().resolve(UUID.randomUUID().toString())
@@ -62,8 +60,7 @@ internal class DefaultFileSource : FileSource {
         archiveName: String,
     ): String = withContext(Dispatchers.IO) {
         val archivePath = AppPaths.resolveArchivesDirectory().resolve("$archiveName.tar.gz")
-        val script = resolveScript(ARCHIVE_SCRIPT_SH, ARCHIVE_SCRIPT_BAT)
-        executeScript(script, workingDir, archivePath.toString())
+        TarGzArchive.createTarGzFromDirectoryContents(Path.of(workingDir), archivePath)
         archivePath.toString()
     }
 
@@ -71,8 +68,7 @@ internal class DefaultFileSource : FileSource {
         archivePath: String,
         workingDir: String,
     ): Unit = withContext(Dispatchers.IO) {
-        val script = resolveScript(EXTRACT_SCRIPT_SH, EXTRACT_SCRIPT_BAT)
-        executeScript(script, archivePath, workingDir)
+        TarGzArchive.extractTarGzToDirectory(Path.of(archivePath), Path.of(workingDir))
     }
 
     override suspend fun cleanupWorkingDirectory(workingDir: String): Unit = withContext(Dispatchers.IO) {
@@ -95,27 +91,6 @@ internal class DefaultFileSource : FileSource {
         val digest = MessageDigest.getInstance("SHA-256")
         val hashBytes = digest.digest(content.toByteArray(Charsets.UTF_8))
         return hashBytes.joinToString("") { "%02x".format(it) }.take(32)
-    }
-
-    private fun resolveScript(shName: String, batName: String): Path {
-        val scriptsDir = AppPaths.resolveScriptsDirectory()
-        return if (isWindows) scriptsDir.resolve(batName) else scriptsDir.resolve(shName)
-    }
-
-    private fun executeScript(scriptPath: Path, vararg args: String) {
-        val command = if (isWindows) {
-            listOf("cmd", "/c", scriptPath.toString()) + args
-        } else {
-            listOf("bash", scriptPath.toString()) + args
-        }
-        val process = ProcessBuilder(command)
-            .redirectErrorStream(true)
-            .start()
-        val output = process.inputStream.bufferedReader().readText()
-        val exitCode = process.waitFor()
-        if (exitCode != 0) {
-            throw RuntimeException("Script ${scriptPath.fileName} failed (exit $exitCode): $output")
-        }
     }
 
     private fun buildFileInfo(path: Path): FileInfoData =
@@ -150,10 +125,4 @@ internal class DefaultFileSource : FileSource {
         }
     }
 
-    companion object {
-        private const val ARCHIVE_SCRIPT_SH = "archive.sh"
-        private const val ARCHIVE_SCRIPT_BAT = "archive.bat"
-        private const val EXTRACT_SCRIPT_SH = "extract.sh"
-        private const val EXTRACT_SCRIPT_BAT = "extract.bat"
-    }
 }

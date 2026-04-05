@@ -8,7 +8,6 @@ object AppPaths {
     private const val META_DIRECTORY_NAME = "meta"
     private const val ARCHIVES_DIRECTORY_NAME = "archives"
     private const val TMP_DIRECTORY_NAME = "tmp"
-    private const val SCRIPTS_DIRECTORY_NAME = "scripts"
     private const val DATABASE_FILE_NAME = "arheo.db"
     private const val RESOURCES_DIRECTORY_NAME = "resources"
     private const val COMPOSE_RESOURCES_PROPERTY = "compose.application.resources.dir"
@@ -25,14 +24,6 @@ object AppPaths {
 
     fun resolveTmpDirectory(): Path =
         resolveAndCreate(resolveDataDirectory().resolve(TMP_DIRECTORY_NAME))
-
-    fun resolveScriptsDirectory(): Path {
-        val resourcesDir = System.getProperty(COMPOSE_RESOURCES_PROPERTY)
-        if (resourcesDir != null) {
-            return Path.of(resourcesDir).resolve(SCRIPTS_DIRECTORY_NAME)
-        }
-        return resolveDataDirectory().resolve(SCRIPTS_DIRECTORY_NAME)
-    }
 
     private fun resolveAndCreate(path: Path): Path {
         Files.createDirectories(path)

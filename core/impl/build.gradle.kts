@@ -15,6 +15,7 @@ kotlin {
             implementation(libs.exposed.jdbc)
             implementation(libs.sqlite.jdbc)
             implementation(libs.slf4j.nop)
+            implementation(libs.apache.commons.compress)
         }
     }
 }
