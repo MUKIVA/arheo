@@ -13,5 +13,6 @@ internal data class Report(
     val workType: ReportWorkType,
     val districts: List<District>,
     val keywords: List<Keyword>,
-    val monuments: List<Monument>
+    val monuments: List<Monument>,
+    val archiveFilePath: String?,
 )

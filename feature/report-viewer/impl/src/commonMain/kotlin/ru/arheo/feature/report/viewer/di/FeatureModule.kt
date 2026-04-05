@@ -3,6 +3,8 @@ package ru.arheo.feature.report.viewer.di
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import ru.arheo.feature.report.viewer.data.DefaultReportRepository
+import ru.arheo.feature.report.viewer.data.SystemFileRepository
+import ru.arheo.feature.report.viewer.domain.FileRepository
 import ru.arheo.feature.report.viewer.domain.ReportRepository
 import ru.arheo.feature.report.viewer.presentation.DefaultReportViewerComponent
 import ru.arheo.feature.report.viewer.presentation.ReportViewerComponent
@@ -21,8 +23,17 @@ internal fun createFeatureModule(
             )
         }.bind<ReportViewerComponent>()
 
-        scoped { ReportViewerStoreFactory(get(), deps.reportId, get()) }
+        scoped {
+            ReportViewerStoreFactory(
+                storeFactory = get(),
+                reportId = deps.reportId,
+                reportRepository = get(),
+                fileRepository = get()
+            )
+        }
         scoped { DefaultReportRepository(get()) }
             .bind<ReportRepository>()
+        scoped { SystemFileRepository(get()) }
+            .bind<FileRepository>()
     }
 }

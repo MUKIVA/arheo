@@ -7,6 +7,7 @@ internal interface ReportViewerComponent {
     val state: StateFlow<ReportViewerStore.State>
 
     fun refresh()
+    fun openMaterials()
     fun back()
 
 }

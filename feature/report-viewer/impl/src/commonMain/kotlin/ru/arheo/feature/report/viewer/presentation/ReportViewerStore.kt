@@ -12,6 +12,7 @@ internal class ReportViewerStore(
     sealed interface Intent {
         data object Refresh : Intent
         data object Loading : Intent
+        data object OpenMaterials : Intent
     }
 
     @Stable
@@ -25,7 +26,8 @@ internal class ReportViewerStore(
         @Immutable
         data class Content(
             val report: UiReport,
-            val monuments: List<UiMonument>
+            val monuments: List<UiMonument>,
+            val hasAttachedFiles: Boolean
         ) : State
     }
 

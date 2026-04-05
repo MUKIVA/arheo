@@ -27,6 +27,10 @@ internal class DefaultReportViewerComponent(
         store.accept(ReportViewerStore.Intent.Refresh)
     }
 
+    override fun openMaterials() {
+        store.accept(ReportViewerStore.Intent.OpenMaterials)
+    }
+
     override fun back() = navigateBack()
 
 }

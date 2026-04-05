@@ -27,11 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import arheo.feature.report_viewer.impl.generated.resources.Res
-import arheo.feature.report_viewer.impl.generated.resources.main_actions_back
-import arheo.feature.report_viewer.impl.generated.resources.main_info_title
-import arheo.feature.report_viewer.impl.generated.resources.monument_list_empty_message
-import arheo.feature.report_viewer.impl.generated.resources.monument_list_title
+import arheo.feature.report_viewer.impl.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import ru.arheo.feature.report.viewer.presentation.ReportViewerComponent
 import ru.arheo.feature.report.viewer.presentation.ReportViewerStore
@@ -119,6 +115,7 @@ private fun ReportViewContent(
 
         item {
             MainActions(
+                state = state,
                 component = component,
                 modifier = containerModifier
             )
@@ -204,16 +201,29 @@ private fun MonumentListEmptyView(
 
 @Composable
 private fun MainActions(
+    state: ReportViewerStore.State.Content,
     component: ReportViewerComponent,
     modifier: Modifier = Modifier
 ) = FlowRow(
     modifier = modifier,
     horizontalArrangement = Arrangement.spacedBy(8.dp)
 ) {
-    OutlinedButton(onClick = component::back) {
+    OutlinedButton(
+        onClick = component::back,
+        shape = MaterialTheme.shapes.large
+    ) {
         Text(stringResource(Res.string.main_actions_back))
     }
+    if (state.hasAttachedFiles) {
+        OutlinedButton(
+            onClick = component::openMaterials,
+            shape = MaterialTheme.shapes.large
+        ) {
+            Text(stringResource(Res.string.main_actions_open_in_explorer))
+        }
+    }
 }
+
 
 @Composable
 private fun MainInfoTable(

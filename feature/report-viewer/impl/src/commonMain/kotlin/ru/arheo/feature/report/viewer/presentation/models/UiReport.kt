@@ -11,4 +11,5 @@ internal data class UiReport(
     val workType: String,
     val districts: String,
     val keywords: String,
+    val archiveFilePath: String?,
 )

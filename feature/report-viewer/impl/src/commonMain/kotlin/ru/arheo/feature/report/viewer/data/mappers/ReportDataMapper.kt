@@ -27,6 +27,7 @@ internal value class ReportDataMapper(
             monuments = data.monuments.map { monumentData ->
                 DataMapper.from(monumentData).toDomain()
             },
+            archiveFilePath = data.archiveFilePath,
         )
     }
 
