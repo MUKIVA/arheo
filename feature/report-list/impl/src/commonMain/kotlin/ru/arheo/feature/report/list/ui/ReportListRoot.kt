@@ -25,7 +25,8 @@ internal fun ReportListRoot(
             onEditReportClick    = component::onEditReport,
             onDeleteReportClick  = component::onRequestDeleteReport,
             onDeleteConfirm      = component::onConfirmDeleteReport,
-            onDeleteDismiss      = component::onDismissDeleteReport
+            onDeleteDismiss      = component::onDismissDeleteReport,
+            onViewReport         = component::onOpenReport
         )
     }
 }

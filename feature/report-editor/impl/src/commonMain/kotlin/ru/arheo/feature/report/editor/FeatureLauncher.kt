@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import org.koin.compose.ComposeContextWrapper
 import org.koin.compose.LocalKoinScope
-import org.koin.compose.koinInject
 import org.koin.compose.scope.rememberKoinScope
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.annotation.KoinInternalApi
@@ -18,11 +17,10 @@ import ru.arheo.feature.report.editor.di.FeatureDependencies
 import ru.arheo.feature.report.editor.di.FeatureScope
 import ru.arheo.feature.report.editor.di.createFeatureModule
 import ru.arheo.feature.report.editor.ui.ReportEditorRoot
-import ru.arheo.feature.report.selector.ReportSelectorFeatureLauncher
 
 @OptIn(KoinExperimentalAPI::class, KoinInternalApi::class)
 @Composable
-fun launcherReportEditorContent(
+fun launchReportEditorContent(
     componentContext: ComponentContext,
     reportId: Long?,
     modifier: Modifier = Modifier,

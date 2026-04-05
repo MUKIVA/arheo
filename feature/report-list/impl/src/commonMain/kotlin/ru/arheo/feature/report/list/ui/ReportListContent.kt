@@ -1,6 +1,7 @@
 package ru.arheo.feature.report.list.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +29,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,7 +53,8 @@ internal fun ReportListContent(
     onEditReportClick: (Long) -> Unit = {},
     onDeleteReportClick: (Long) -> Unit = {},
     onDeleteConfirm: () -> Unit = {},
-    onDeleteDismiss: () -> Unit = {}
+    onDeleteDismiss: () -> Unit = {},
+    onViewReport: (Long) -> Unit = {}
 ) = Scaffold(
     topBar = {
         OutlinedTextField(
@@ -71,6 +72,7 @@ internal fun ReportListContent(
             bottomPadding = paddingValues.calculateBottomPadding(),
             onEditReport = onEditReportClick,
             onDeleteReport = onDeleteReportClick,
+            onViewReport = onViewReport,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 8.dp)
@@ -119,6 +121,7 @@ private fun ReportTable(
     modifier: Modifier = Modifier,
     onEditReport: (Long) -> Unit = {},
     onDeleteReport: (Long) -> Unit = {},
+    onViewReport: (Long) -> Unit = {}
 ) = Column(modifier = modifier) {
     ReportTableHeader(
         modifier = Modifier
@@ -134,7 +137,8 @@ private fun ReportTable(
             bottomPadding = bottomPadding,
             modifier = Modifier.fillMaxSize(),
             onEditReport = onEditReport,
-            onDeleteReport = onDeleteReport
+            onDeleteReport = onDeleteReport,
+            onViewReport = onViewReport
         )
     }
 
@@ -159,13 +163,15 @@ private fun ReportList(
     bottomPadding: Dp,
     modifier: Modifier = Modifier,
     onEditReport: (Long) -> Unit,
-    onDeleteReport: (Long) -> Unit
+    onDeleteReport: (Long) -> Unit,
+    onViewReport: (Long) -> Unit
 ) = LazyColumn(modifier = modifier) {
     items(reports, key = { it.id }) { report ->
         ReportItem(
             report = report,
             onEditReport = { onEditReport(report.id) },
             onDeleteReport = { onDeleteReport(report.id) },
+            onViewReport = { onViewReport(report.id) }
         )
         HorizontalDivider()
     }
@@ -217,44 +223,45 @@ private fun ReportItem(
     report: UiReport,
     onEditReport: () -> Unit,
     onDeleteReport: () -> Unit,
+    onViewReport: () -> Unit
+) = Row(
+    modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onViewReport() }
+        .padding(horizontal = 16.dp, vertical = 8.dp),
+    verticalAlignment = Alignment.CenterVertically
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = report.name,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(3f),
-        )
-        Text(
-            text = report.authors.joinToString(", "),
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(2f),
-        )
-        Text(
-            text = "${report.year}",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(0.7f),
-        )
-        Text(
-            text = report.workType,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1.3f),
-        )
-        ReportItemActions(
-            modifier = Modifier.width(120.dp),
-            onEditReport = onEditReport,
-            onDeleteReport = onDeleteReport
-        )
-    }
+    Text(
+        text = report.name,
+        style = MaterialTheme.typography.bodyMedium,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(3f),
+    )
+    Text(
+        text = report.authors.joinToString(", "),
+        style = MaterialTheme.typography.bodyMedium,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(2f),
+    )
+    Text(
+        text = "${report.year}",
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.weight(0.7f),
+    )
+    Text(
+        text = report.workType,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.weight(1.3f),
+    )
+    ReportItemActions(
+        modifier = Modifier.width(120.dp),
+        onEditReport = onEditReport,
+        onDeleteReport = onDeleteReport
+    )
 }
+
 
 @Composable
 private fun ReportItemActions(

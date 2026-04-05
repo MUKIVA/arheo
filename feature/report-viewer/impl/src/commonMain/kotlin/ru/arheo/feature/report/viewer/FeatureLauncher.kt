@@ -1,4 +1,4 @@
-package ru.arheo.feature.report.list
+package ru.arheo.feature.report.viewer
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -13,28 +13,22 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.annotation.KoinInternalApi
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
-import ru.arheo.feature.report.list.di.FeatureDependencies
-import ru.arheo.feature.report.list.di.FeatureScope
-import ru.arheo.feature.report.list.di.createFeatureModule
-import ru.arheo.feature.report.list.ui.ReportListRoot
+import ru.arheo.feature.report.viewer.di.FeatureDependencies
+import ru.arheo.feature.report.viewer.di.FeatureScope
+import ru.arheo.feature.report.viewer.di.createFeatureModule
+import ru.arheo.feature.report.viewer.ui.ReportViewerRoot
 
-@OptIn(KoinInternalApi::class, KoinExperimentalAPI::class)
+@OptIn(KoinExperimentalAPI::class, KoinInternalApi::class)
 @Composable
-fun launchReportListContent(
+fun launchReportViewerContent(
     componentContext: ComponentContext,
-    modifier: Modifier = Modifier,
-    onEditReport: (Long) -> Unit = {},
-    onCreateReport: () -> Unit = {},
-    onViewReport: (Long) -> Unit = {}
+    reportId: Long,
+    navigateBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val scope = rememberKoinScope(FeatureScope().scope)
-    val deps = remember(componentContext, onEditReport, onCreateReport) {
-        FeatureDependencies(
-            componentContext = componentContext,
-            navigateCreateReport = onCreateReport,
-            navigateEditReport = onEditReport,
-            navigateViewReport = onViewReport
-        )
+    val deps = remember(componentContext) {
+        FeatureDependencies(componentContext, reportId, navigateBack)
     }
     val module = remember { createFeatureModule(deps) }
 
@@ -43,7 +37,7 @@ fun launchReportListContent(
     CompositionLocalProvider(
         LocalKoinScope provides ComposeContextWrapper(scope)
     ) {
-        ReportListRoot(modifier)
+        ReportViewerRoot(modifier)
     }
 
     DisposableEffect(Unit) {

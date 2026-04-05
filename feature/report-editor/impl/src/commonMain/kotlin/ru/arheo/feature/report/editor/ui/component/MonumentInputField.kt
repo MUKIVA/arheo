@@ -14,14 +14,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import arheo.feature.report_editor.impl.generated.resources.Res
-import arheo.feature.report_editor.impl.generated.resources.editor_monument_action_remove
-import arheo.feature.report_editor.impl.generated.resources.editor_monument_field_culture
-import arheo.feature.report_editor.impl.generated.resources.editor_monument_field_location
-import arheo.feature.report_editor.impl.generated.resources.editor_monument_field_name
-import arheo.feature.report_editor.impl.generated.resources.editor_monument_field_number
-import arheo.feature.report_editor.impl.generated.resources.editor_monument_field_period
-import arheo.feature.report_editor.impl.generated.resources.editor_monument_field_type
+import arheo.feature.report_editor.impl.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentCulture
 import ru.arheo.feature.report.editor.domian.models.monument.MonumentLocation
@@ -89,6 +82,7 @@ private inline fun MonumentInfoInput(
 ) = Column(modifier) {
     OutlinedTextField(
         value = monument.type.value,
+        shape = MaterialTheme.shapes.large,
         onValueChange = { onUpdate(monument.copy(type = MonumentType(it))) },
         label = { Text(stringResource(Res.string.editor_monument_field_type)) },
         singleLine = true,
@@ -96,6 +90,7 @@ private inline fun MonumentInfoInput(
     )
     OutlinedTextField(
         value = monument.culture.value,
+        shape = MaterialTheme.shapes.large,
         onValueChange = { onUpdate(monument.copy(culture = MonumentCulture(it))) },
         label = { Text(stringResource(Res.string.editor_monument_field_culture)) },
         singleLine = true,
@@ -103,6 +98,7 @@ private inline fun MonumentInfoInput(
     )
     OutlinedTextField(
         value = monument.period.value,
+        shape = MaterialTheme.shapes.large,
         onValueChange = { onUpdate(monument.copy(period = MonumentPeriod(it))) },
         label = { Text(stringResource(Res.string.editor_monument_field_period)) },
         singleLine = true,
@@ -110,6 +106,7 @@ private inline fun MonumentInfoInput(
     )
     OutlinedTextField(
         value = monument.geographicLocation.value,
+        shape = MaterialTheme.shapes.large,
         onValueChange = { onUpdate(monument.copy(geographicLocation = MonumentLocation(it))) },
         label = { Text(stringResource(Res.string.editor_monument_field_location)) },
         singleLine = true,
@@ -128,6 +125,7 @@ private inline fun MonumentNameInput(
 ) {
     OutlinedTextField(
         value = monument.name.value,
+        shape = MaterialTheme.shapes.large,
         onValueChange = { onUpdate(monument.copy(name = MonumentName(it))) },
         label = { Text(stringResource(Res.string.editor_monument_field_name)) },
         singleLine = true,
@@ -135,6 +133,7 @@ private inline fun MonumentNameInput(
     )
     OutlinedTextField(
         value = monument.number.value,
+        shape = MaterialTheme.shapes.large,
         onValueChange = { onUpdate(monument.copy(number = MonumentNumber(it))) },
         label = { Text(stringResource(Res.string.editor_monument_field_number)) },
         singleLine = true,

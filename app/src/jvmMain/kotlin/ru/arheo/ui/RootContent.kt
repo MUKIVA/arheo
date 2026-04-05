@@ -10,9 +10,17 @@ import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import org.koin.compose.koinInject
-import ru.arheo.feature.report.editor.launcherReportEditorContent
+import ru.arheo.feature.report.editor.launchReportEditorContent
 import ru.arheo.feature.report.list.launchReportListContent
+import ru.arheo.feature.report.viewer.launchReportViewerContent
 import ru.arheo.navigation.RootComponent
+
+
+private val screenModifier: Modifier
+    get() = Modifier
+        .fillMaxSize()
+        .widthIn(max = 1200.dp)
+        .padding(horizontal = 32.dp)
 
 @Composable
 fun RootContent(
@@ -29,20 +37,21 @@ fun RootContent(
                 componentContext = instance.componentContext,
                 onCreateReport = instance.navigateCreateReport,
                 onEditReport = instance.navigateEditReport,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .widthIn(max = 1200.dp)
-                    .padding(horizontal = 32.dp)
+                onViewReport = instance.navigateViewReport,
+                modifier = screenModifier
+
             )
-            is RootComponent.Child.ReportEditor -> launcherReportEditorContent(
+            is RootComponent.Child.ReportEditor -> launchReportEditorContent(
                 componentContext = instance.componentContext,
                 reportId = instance.reportId,
                 navigateBack = instance.navigateBack,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .widthIn(max = 1200.dp)
-                    .padding(horizontal = 32.dp),
-
+                modifier = screenModifier
+            )
+            is RootComponent.Child.ReportViewer -> launchReportViewerContent(
+                componentContext = instance.componentContext,
+                reportId = instance.reportId,
+                navigateBack = instance.navigateBack,
+                modifier = screenModifier
             )
         }
     }

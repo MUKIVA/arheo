@@ -11,7 +11,8 @@ internal class DefaultReportListComponent(
     componentContext: ComponentContext,
     private val reportListStoreFactory: ReportListStoreFactory,
     private val navigateCreateReport: () -> Unit,
-    private val navigateEditReport: (Long) -> Unit
+    private val navigateEditReport: (Long) -> Unit,
+    private val navigateViewReport: (Long) -> Unit
 ) : ReportListComponent, ComponentContext by componentContext {
 
     init {
@@ -20,10 +21,12 @@ internal class DefaultReportListComponent(
 //        )
     }
 
-    private val store: ReportListStore =
-        instanceKeeper.getStore("ReportListStore") {
+    private val store: ReportListStore by lazy {
+        instanceKeeper.getStore(ReportListStoreFactory.STORE_NAME) {
             reportListStoreFactory.create()
         }
+    }
+
 
     @ExperimentalCoroutinesApi
     override val state: StateFlow<ReportListStore.State> = store.stateFlow
@@ -50,5 +53,9 @@ internal class DefaultReportListComponent(
 
     override fun onDismissDeleteReport() {
         store.accept(ReportListStore.Intent.DismissDeleteReport)
+    }
+
+    override fun onOpenReport(reportId: Long) {
+        navigateViewReport(reportId)
     }
 }

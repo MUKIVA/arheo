@@ -19,7 +19,7 @@ internal fun createAppModule() = module {
         .bind<Lifecycle>()
     single<ComponentContext> { DefaultComponentContext(get()) }
     single<RootComponent> {
-        DefaultRootComponent(get(), get())
+        DefaultRootComponent(get())
     }
     single<StoreFactory> { LoggingStoreFactory(DefaultStoreFactory()) }
 

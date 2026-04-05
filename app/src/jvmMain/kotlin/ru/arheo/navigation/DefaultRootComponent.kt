@@ -9,11 +9,9 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
-import ru.arheo.feature.report.selector.ReportSelectorFeatureLauncher
 
 class DefaultRootComponent(
-    componentContext: ComponentContext,
-    private val reportSelectorFeatureLauncher: ReportSelectorFeatureLauncher
+    componentContext: ComponentContext
 ) : RootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
@@ -39,6 +37,9 @@ class DefaultRootComponent(
             },
             navigateEditReport = { reportId ->
                 navigation.push(Config.ReportEditor(reportId))
+            },
+            navigateViewReport = { reportId ->
+                navigation.push(Config.ReportViewer(reportId))
             }
 
         )
@@ -47,14 +48,28 @@ class DefaultRootComponent(
             reportId = config.reportId,
             navigateBack = { navigation.pop() }
         )
+
+        is Config.ReportViewer -> RootComponent.Child.ReportViewer(
+            componentContext = componentContext,
+            reportId = config.reportId,
+            navigateBack = { navigation.pop() }
+        )
     }
 
     @Serializable
     private sealed interface Config {
+
+        @Serializable
+        data class ReportViewer(
+            val reportId: Long
+        ) : Config
+
         @Serializable
         data object ReportList : Config
 
         @Serializable
-        data class ReportEditor(val reportId: Long? = null) : Config
+        data class ReportEditor(
+            val reportId: Long? = null
+        ) : Config
     }
 }

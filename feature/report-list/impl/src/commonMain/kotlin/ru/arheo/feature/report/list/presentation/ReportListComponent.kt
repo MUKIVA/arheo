@@ -12,5 +12,6 @@ internal interface ReportListComponent {
     fun onRequestDeleteReport(reportId: Long)
     fun onConfirmDeleteReport()
     fun onDismissDeleteReport()
+    fun onOpenReport(reportId: Long)
 
 }

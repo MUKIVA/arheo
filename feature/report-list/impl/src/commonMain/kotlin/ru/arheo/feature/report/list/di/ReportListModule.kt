@@ -22,7 +22,8 @@ internal fun createFeatureModule(
                 componentContext = get(),
                 reportListStoreFactory = get(),
                 navigateCreateReport = deps.navigateCreateReport,
-                navigateEditReport = deps.navigateEditReport
+                navigateEditReport = deps.navigateEditReport,
+                navigateViewReport = deps.navigateViewReport
             )
         }.bind<ReportListComponent>()
     }

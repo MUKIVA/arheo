@@ -7,17 +7,23 @@ import com.arkivanov.decompose.value.Value
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
 
-    sealed class Child {
+    sealed interface Child {
         data class ReportList(
             val componentContext: ComponentContext,
             val navigateCreateReport: () -> Unit,
-            val navigateEditReport: (Long) -> Unit
-        ) : Child()
+            val navigateEditReport: (Long) -> Unit,
+            val navigateViewReport: (Long) -> Unit
+        ) : Child
         data class ReportEditor(
             val componentContext: ComponentContext,
             val reportId: Long?,
             val navigateBack: () -> Unit
-        ) : Child()
+        ) : Child
+        data class ReportViewer(
+            val componentContext: ComponentContext,
+            val reportId: Long,
+            val navigateBack: () -> Unit
+        ) : Child
     }
 }
 

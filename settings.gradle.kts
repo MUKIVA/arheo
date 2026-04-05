@@ -34,11 +34,18 @@ plugins {
 }
 
 include(":app")
+
 include(":core:api")
 include(":core:impl")
+
 include(":feature:report-list:api")
 include(":feature:report-list:impl")
+
 include(":feature:report-editor:api")
 include(":feature:report-editor:impl")
+
 include(":feature:report-selector:api")
 include(":feature:report-selector:impl")
+
+include(":feature:report-viewer:api")
+include(":feature:report-viewer:impl")

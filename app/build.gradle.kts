@@ -33,6 +33,9 @@ kotlin {
             implementation(projects.feature.reportEditor.impl)
             implementation(projects.feature.reportSelector.api)
             implementation(projects.feature.reportSelector.impl)
+            implementation(projects.feature.reportViewer.api)
+            implementation(projects.feature.reportViewer.impl)
+            
             implementation(libs.bundles.compose)
             implementation(libs.decompose.extensions.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
