@@ -35,8 +35,7 @@ plugins {
 
 include(":app")
 
-include(":core:api")
-include(":core:impl")
+include(":core")
 
 include(":feature:report-list:api")
 include(":feature:report-list:impl")

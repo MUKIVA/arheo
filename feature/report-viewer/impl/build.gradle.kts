@@ -9,7 +9,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.api)
+            implementation(projects.core)
             implementation(libs.bundles.mvikotlin)
             implementation(libs.decompose.core)
             implementation(libs.koin.core)

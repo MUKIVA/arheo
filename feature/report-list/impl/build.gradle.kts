@@ -9,7 +9,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.api)
+            implementation(projects.core)
             implementation(projects.feature.reportList.api)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
