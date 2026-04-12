@@ -88,8 +88,12 @@ internal class ReportEditorExecutor(
                 val archiveName = fileRepository.computeArchiveName(report)
 
                 val archivePath = when {
-                    Files.walk(content.woking).toList().isNotEmpty() -> fileRepository
-                        .archiveWorkingDirectory(content.woking, archiveName)
+                    Files.walk(content.woking).toList().isNotEmpty() -> {
+                        if (content.archive != null) {
+                            fileRepository.deleteArchive(content.archive)
+                        }
+                        fileRepository.archiveWorkingDirectory(content.woking, archiveName)
+                    }
                     else -> null
                 }
 

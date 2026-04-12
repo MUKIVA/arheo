@@ -6,9 +6,9 @@ import com.arkivanov.mvikotlin.core.store.Store
 import ru.arheo.feature.report.list.presentation.models.UiReport
 
 internal class ReportListStore(
-    private val implementation: Store<Intent, State, Label>
+    private val implementation: Store<Intent, State, Nothing>
 )
-    : Store<ReportListStore.Intent, ReportListStore.State, ReportListStore.Label>
+    : Store<ReportListStore.Intent, ReportListStore.State, Nothing>
     by implementation {
 
     sealed interface Intent {
@@ -30,10 +30,5 @@ internal class ReportListStore(
             val searchQuery: String = String(),
             val deletingReportId: Long? = null
         ) : State
-    }
-
-    sealed interface Label {
-        data class EditReport(val reportId: Long) : Label
-        data object CreateReport : Label
     }
 }

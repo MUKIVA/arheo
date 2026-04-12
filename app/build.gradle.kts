@@ -25,7 +25,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-//            implementation(projects.core.api)
             implementation(projects.core)
             implementation(projects.feature.reportList.api)
             implementation(projects.feature.reportList.impl)

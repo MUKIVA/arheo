@@ -17,7 +17,7 @@ internal class ReportListExecutor(
         ReportListAction,
         ReportListStore.State,
         ReportListPatch,
-        ReportListStore.Label
+        Nothing
         >() {
 
     private val searchQueryFlow = MutableStateFlow(String())
