@@ -20,7 +20,7 @@ internal value class MonumentDataMapper(
             name = MonumentName(data.name),
             type = MonumentType(data.type),
             culture = MonumentCulture(data.culture),
-            period = MonumentPeriod(data.culture),
+            period = MonumentPeriod(data.period),
             location = MonumentLocation(data.geographicLocation),
             number = MonumentNumber(data.number)
         )
