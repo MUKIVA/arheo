@@ -55,7 +55,12 @@ compose.desktop {
 
         buildTypes.release {
             proguard {
-                isEnabled.set(false)
+                isEnabled.set(true)
+                version.set(libs.versions.proguard.get())
+                optimize.set(true)
+                obfuscate.set(true)
+                joinOutputJars.set(true)
+                configurationFiles.from(project.file("compose-desktop.pro"))
             }
         }
 
