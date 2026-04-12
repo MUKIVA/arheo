@@ -18,6 +18,7 @@ import ru.arheo.feature.report.editor.domian.models.report.ReportId
 import ru.arheo.feature.report.editor.domian.models.report.ReportName
 import ru.arheo.feature.report.editor.domian.models.report.ReportWorkType
 import ru.arheo.feature.report.editor.domian.models.report.ReportYear
+import java.nio.file.Path
 
 @JvmInline
 internal value class DataReportMapper(
@@ -32,7 +33,7 @@ internal value class DataReportMapper(
         districts = data.districts.map { District(it) },
         keywords = data.keywords.map { Keyword(it) },
         monuments = data.monuments.map { it.toDomain() },
-        archiveFilePath = data.archiveFilePath,
+        archive = data.archiveFilePath?.let { Path.of(it) },
     )
 
     private fun MonumentData.toDomain(): Monument = Monument(

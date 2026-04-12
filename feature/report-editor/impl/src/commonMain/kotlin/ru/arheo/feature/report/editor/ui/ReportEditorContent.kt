@@ -30,7 +30,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,7 +41,6 @@ import arheo.feature.report_editor.impl.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import ru.arheo.feature.report.editor.presentation.ReportEditorComponent
 import ru.arheo.feature.report.editor.presentation.ReportEditorStore
-import ru.arheo.feature.report.editor.presentation.models.SaveValidationError
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 import ru.arheo.feature.report.editor.ui.component.ChipInputField
 import ru.arheo.feature.report.editor.ui.component.MonumentInputField
@@ -73,73 +71,54 @@ internal fun ReportEditorContent(
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
-) {
-    val selectorWorkingDir = remember { mutableStateOf("") }
-    val selectorHasFiles = remember { mutableStateOf(false) }
+) = Scaffold(
+    modifier = modifier,
+    snackbarHost = { SnackbarHost(snackbarHostState) },
+    topBar = { TopAppBar(title = { EditorTitle(state.isEditing) }) },
+    content = { paddingValues ->
+        val dynamicFields = DynamicFieldDefaults.rememberDynamicFields(component, state)
 
-    val errorMessages = rememberErrorMessages()
-    LaunchedEffect(component) {
-        component.events.collect { event ->
-            when (event) {
-                is ReportEditorComponent.Event.ShowValidationError ->
-                    snackbarHostState.showSnackbar(errorMessages.getValue(event.error))
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(top = paddingValues.calculateTopPadding())
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            ActionButtons(
+                isSaving = state.isSaving,
+                component = component,
+                modifier = containerModifier
+            )
+            StaticFields(
+                state = state,
+                onReportNameChanged = component::onNameChanged,
+                onReportYearChanged = component::onYearChanged,
+                onReportWorkTypeChanged = component::onWorkTypeChanged,
+                modifier = containerModifier,
+            )
+            DynamicFields(
+                fieldStateList = dynamicFields,
+                modifier = containerModifier,
+            )
+            MonumentsSection(
+                items = state.monuments,
+                onItemUpdate = component::onUpdateMonument,
+                onItemRemove = component::onRemoveMonument,
+                onAddMonument = component::onAddMonument,
+                modifier = containerModifier
+            )
+            reportSelector.launch(
+                componentContext = component,
+                modifier = containerModifier.fillMaxWidth(),
+                archive = state.archive,
+                working = state.woking
+            )
+            Spacer(Modifier.fillMaxWidth().height(paddingValues.calculateBottomPadding()))
         }
     }
+)
 
-    Scaffold(
-        modifier = modifier,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = { TopAppBar(title = { EditorTitle(state.isEditing) }) },
-        content = { paddingValues ->
-            val dynamicFields = DynamicFieldDefaults.rememberDynamicFields(component, state)
-
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(top = paddingValues.calculateTopPadding())
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                ActionButtons(
-                    isSaving = state.isSaving,
-                    component = component,
-                    selectorWorkingDir = selectorWorkingDir.value,
-                    selectorHasFiles = selectorHasFiles.value,
-                    modifier = containerModifier
-                )
-                StaticFields(
-                    state = state,
-                    onReportNameChanged = component::onNameChanged,
-                    onReportYearChanged = component::onYearChanged,
-                    onReportWorkTypeChanged = component::onWorkTypeChanged,
-                    modifier = containerModifier,
-                )
-                DynamicFields(
-                    fieldStateList = dynamicFields,
-                    modifier = containerModifier,
-                )
-                MonumentsSection(
-                    items = state.monuments,
-                    onItemUpdate = component::onUpdateMonument,
-                    onItemRemove = component::onRemoveMonument,
-                    onAddMonument = component::onAddMonument,
-                    modifier = containerModifier
-                )
-                reportSelector.launch(
-                    componentContext = component,
-                    modifier = containerModifier.fillMaxWidth(),
-                    archiveFilePath = state.archiveFilePath,
-                    onFileStateChanged = { workingDir, hasFiles ->
-                        selectorWorkingDir.value = workingDir
-                        selectorHasFiles.value = hasFiles
-                    },
-                )
-                Spacer(Modifier.fillMaxWidth().height(paddingValues.calculateBottomPadding()))
-            }
-        }
-    )
-}
 
 @Composable
 private fun EditorTitle(isEditing: Boolean) {
@@ -300,20 +279,13 @@ private fun MonumentsSection(
 private fun ActionButtons(
     isSaving: Boolean,
     component: ReportEditorComponent,
-    selectorWorkingDir: String,
-    selectorHasFiles: Boolean,
     modifier: Modifier = Modifier,
 ) = FlowRow(
     modifier = modifier,
     horizontalArrangement = Arrangement.spacedBy(8.dp)
 ) {
     Button(
-        onClick = {
-            component.onSave(
-                workingDirectory = selectorWorkingDir,
-                hasFiles = selectorHasFiles
-            )
-        },
+        onClick = component::onSave,
         shape = MaterialTheme.shapes.large,
         enabled = !isSaving,
     ) {
@@ -323,25 +295,9 @@ private fun ActionButtons(
         )
     }
     OutlinedButton(
-        onClick = component::onCancel,
+        onClick = component::onBack,
         shape = MaterialTheme.shapes.large,
     ) {
         Text(stringResource(Res.string.editor_action_cancel))
-    }
-}
-
-@Composable
-private fun rememberErrorMessages(): Map<SaveValidationError, String> {
-    val emptyTitle = stringResource(Res.string.editor_error_empty_title)
-    val invalidYear = stringResource(Res.string.editor_error_invalid_year)
-    val noAuthors = stringResource(Res.string.editor_error_no_authors)
-    val saveFailed = stringResource(Res.string.editor_error_save_failed)
-    return remember {
-        mapOf(
-            SaveValidationError.EMPTY_TITLE to emptyTitle,
-            SaveValidationError.INVALID_YEAR to invalidYear,
-            SaveValidationError.NO_AUTHORS to noAuthors,
-            SaveValidationError.SAVE_FAILED to saveFailed,
-        )
     }
 }

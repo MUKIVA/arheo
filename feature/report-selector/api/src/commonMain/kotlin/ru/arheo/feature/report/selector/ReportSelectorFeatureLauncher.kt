@@ -3,6 +3,7 @@ package ru.arheo.feature.report.selector
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
+import java.nio.file.Path
 
 interface ReportSelectorFeatureLauncher {
 
@@ -10,7 +11,7 @@ interface ReportSelectorFeatureLauncher {
     fun launch(
         componentContext: ComponentContext,
         modifier: Modifier,
-        archiveFilePath: String? = null,
-        onFileStateChanged: (workingDirectory: String, hasFiles: Boolean) -> Unit = { _, _ -> },
+        working: Path,
+        archive: Path? = null
     )
 }

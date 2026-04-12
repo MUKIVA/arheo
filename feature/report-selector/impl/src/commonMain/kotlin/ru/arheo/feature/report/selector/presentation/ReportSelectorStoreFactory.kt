@@ -2,11 +2,13 @@ package ru.arheo.feature.report.selector.presentation
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import ru.arheo.feature.report.selector.domain.FileRepository
+import java.nio.file.Path
 
 internal class ReportSelectorStoreFactory(
     private val storeFactory: StoreFactory,
     private val fileRepository: FileRepository,
-    private val archiveFilePath: String?,
+    private val working: Path,
+    private val archive: Path?,
 ) {
 
     fun create(): ReportSelectorStore {
@@ -14,7 +16,7 @@ internal class ReportSelectorStoreFactory(
             implementation = storeFactory.create(
                 name = STORE_NAME,
                 initialState = ReportSelectorStore.State.Loading,
-                bootstrapper = ReportSelectorBootstrapper(fileRepository, archiveFilePath),
+                bootstrapper = ReportSelectorBootstrapper(fileRepository, working, archive),
                 executorFactory = { ReportSelectorExecutor(fileRepository) },
                 reducer = ReportSelectorReducer(),
             )

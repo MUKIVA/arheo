@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.arkivanov.mvikotlin.core.store.Store
 import ru.arheo.feature.report.selector.presentation.models.UiFileInfo
+import java.nio.file.Path
 
 internal class ReportSelectorStore(
     implementation: Store<Intent, State, Nothing>
@@ -12,10 +13,10 @@ internal class ReportSelectorStore(
     by implementation {
 
     sealed interface Intent {
-        data class AttachFiles(val paths: List<String>) : Intent
+        data class AttachFiles(val paths: List<Path>) : Intent
         data class RemoveFile(val fileName: String) : Intent
         data class UpdateDragOver(val isDragging: Boolean) : Intent
-        data class LoadArchive(val archivePath: String) : Intent
+        data class LoadArchive(val archivePath: Path) : Intent
     }
 
     @Stable
@@ -26,8 +27,7 @@ internal class ReportSelectorStore(
         @Immutable
         data class Content(
             val attachedFiles: List<UiFileInfo> = emptyList(),
-            val isDraggingOver: Boolean = false,
-            val workingDirectory: String = String()
+            val isDraggingOver: Boolean = false
         ) : State
     }
 

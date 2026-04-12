@@ -29,7 +29,7 @@ internal class ReportViewerReducer : Reducer<ReportViewerStore.State, ReportView
                 monuments = listOf(UiMonument.Header) + patch.report.monuments
                     .map(UiMapper::from)
                     .map(MonumentMapper::toUiContent),
-                hasAttachedFiles = patch.report.archiveFilePath != null
+                hasAttachedFiles = patch.report.archive != null
             )
             is ReportViewerPatch.FailToLoadReport -> ReportViewerStore.State.Error
             else -> state

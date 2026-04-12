@@ -2,47 +2,39 @@ package ru.arheo.feature.report.editor.presentation
 
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import kotlinx.coroutines.launch
+import ru.arheo.feature.report.editor.domian.FileRepository
 import ru.arheo.feature.report.editor.domian.ReportRepository
 import ru.arheo.feature.report.editor.domian.models.report.Report
 import ru.arheo.feature.report.editor.domian.models.report.ReportId
+import java.nio.file.Path
 
 internal class ReportEditorBootstrapper(
     private val reportId: Long?,
-    private val repository: ReportRepository
+    private val reportRepository: ReportRepository,
+    private val fileRepository: FileRepository
 ) : CoroutineBootstrapper<ReportEditorAction>() {
     override fun invoke() {
-//        scope.launch {
-//            val authors = repository.getAllAuthors()
-//            val workTypes = repository.getAllWorkTypes()
-//            dispatch(ReportEditorAction.SuggestionsLoaded(authors, workTypes))
-//        }
-//        if (reportId != null) {
-//            scope.launch {
-//                val report = repository.getReportById(ReportId(reportId))
-//                if (report != null) {
-//                    dispatch(ReportEditorAction.ReportLoaded(report))
-//                }
-//            }
-//        }
-        when {
-            reportId != null -> editReport(reportId)
-            else -> createNewReport()
+        scope.launch {
+            val working = fileRepository.createWorkingDirectory()
+
+            when {
+                reportId != null -> editReport(reportId, working)
+                else -> createNewReport(working)
+            }
         }
     }
 
-    private fun createNewReport() {
-        dispatch(ReportEditorAction.ReportLoaded(Report.default()))
+    private fun createNewReport(working: Path) {
+        dispatch(ReportEditorAction.ReportLoaded(Report.default(), working))
     }
 
-    private fun editReport(reportId: Long) {
+    private fun editReport(reportId: Long, working: Path) {
         scope.launch {
-            val report = repository.getReportById(ReportId(reportId))
-            if (report == null) {
+            val report = reportRepository.getReportById(ReportId(reportId)) ?: run {
                 dispatch(ReportEditorAction.ReportLoadError)
-            } else {
-                dispatch(ReportEditorAction.ReportLoaded(report))
+                return@launch
             }
-
+            dispatch(ReportEditorAction.ReportLoaded(report, working))
         }
     }
 }

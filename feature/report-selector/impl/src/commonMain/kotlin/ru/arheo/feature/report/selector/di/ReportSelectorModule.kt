@@ -15,7 +15,14 @@ internal fun createFeatureModule(
         scoped { deps.componentContext }
         scoped { DefaultFileRepository(get()) }
             .bind<FileRepository>()
-        scoped { ReportSelectorStoreFactory(get(), get(), deps.archiveFilePath) }
+        scoped {
+            ReportSelectorStoreFactory(
+                storeFactory = get(),
+                fileRepository = get(),
+                working = deps.working,
+                archive = deps.archive
+            )
+        }
         scoped {
             DefaultReportSelectorComponent(
                 componentContext = get(),

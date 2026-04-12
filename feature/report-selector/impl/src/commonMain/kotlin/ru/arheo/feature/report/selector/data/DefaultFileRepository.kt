@@ -5,69 +5,52 @@ import ru.arheo.feature.report.selector.data.mappers.FileInfoDataMapper
 import ru.arheo.feature.report.selector.data.mappers.Mapper
 import ru.arheo.feature.report.selector.domain.FileRepository
 import ru.arheo.feature.report.selector.domain.models.FileInfo
+import java.nio.file.Path
 
 internal class DefaultFileRepository(
     private val source: FileSource
 ) : FileRepository {
-    override suspend fun createWorkingDirectory(): String {
-        return source.createWorkingDirectory()
-    }
-
     override suspend fun copyToWorking(
-        workingDir: String,
-        sourcePaths: List<String>
-    ) = source.copyToWorking(
-        workingDir = workingDir,
-        sourcePaths = sourcePaths
-    )
+        working: Path,
+        sources: List<Path>
+    ) = source.copyToWorking(working, sources)
 
 
     override suspend fun listWorkingFiles(
-        workingDir: String
+        working: Path
     ): List<FileInfo> {
-        return source.listWorkingFiles(workingDir)
+        return source.listWorkingFiles(working)
             .map(Mapper::from)
             .map(FileInfoDataMapper::toDomain)
     }
 
     override suspend fun removeFromWorking(
-        workingDir: String,
+        working: Path,
         fileName: String
     ) {
         source.removeFromWorking(
-            workingDir = workingDir,
+            working = working,
             fileName = fileName
         )
     }
 
     override suspend fun archiveWorkingDirectory(
-        workingDir: String,
+        working: Path,
         archiveName: String
-    ): String {
-        return source.archiveWorkingDirectory(
-            workingDir = workingDir,
-            archiveName = archiveName
-        )
-    }
+    ): Path = source.archiveWorkingDirectory(working, archiveName)
+
 
     override suspend fun extractArchive(
-        archivePath: String,
-        workingDir: String
-    ) = source.extractArchive(
-        archivePath = archivePath,
-        workingDir = workingDir
-    )
+        archive: Path,
+        working: Path
+    ) = source.extractArchive(archive, working)
 
 
     override suspend fun cleanupWorkingDirectory(
-        workingDir: String
-    ) = source.cleanupWorkingDirectory(
-        workingDir = workingDir
-    )
+        working: Path
+    ) = source.cleanupWorkingDirectory(working)
 
     override suspend fun deleteArchive(
-        archivePath: String
-    ) = source.deleteArchive(
-        archivePath = archivePath
-    )
+        archive: Path
+    ) = source.deleteArchive(archive)
 }

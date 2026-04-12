@@ -14,57 +14,56 @@ import java.nio.file.StandardCopyOption
 
 internal object TarGzArchive {
 
-    fun createTarGzFromDirectoryContents(sourceDir: Path, archiveFile: Path) {
-        BufferedOutputStream(Files.newOutputStream(archiveFile)).use { bufferedOut ->
-            GzipCompressorOutputStream(bufferedOut).use { gzipOut ->
-                TarArchiveOutputStream(gzipOut).use { tarOut ->
-                    tarOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX)
-                    Files.walk(sourceDir).use { stream ->
-                        stream
-                            .filter { path -> path != sourceDir }
-                            .sorted()
-                            .forEach { path ->
-                                val relative = sourceDir.relativize(path).toString().replace('\\', '/')
-                                val entryName = if (Files.isDirectory(path)) "$relative/" else relative
-                                val entry = TarArchiveEntry(path.toFile(), entryName)
-                                tarOut.putArchiveEntry(entry)
-                                if (Files.isRegularFile(path)) {
-                                    Files.copy(path, tarOut)
-                                }
-                                tarOut.closeArchiveEntry()
-                            }
-                    }
-                }
-            }
+    fun createTarGzFromDirectoryContents(source: Path, archive: Path) {
+        val stream = Files.newOutputStream(archive)
+            .let(::BufferedOutputStream)
+            .let(::GzipCompressorOutputStream)
+            .let(::TarArchiveOutputStream)
+        stream.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX)
+
+        Files.walk(source).apply {
+            this.filter { path -> path != source }
+                .sorted()
+                .forEach { path -> archiveEntry(source, path, stream) }
         }
     }
 
-    fun extractTarGzToDirectory(archiveFile: Path, destDir: Path) {
-        Files.createDirectories(destDir)
-        BufferedInputStream(Files.newInputStream(archiveFile)).use { bufferedIn ->
-            GzipCompressorInputStream(bufferedIn).use { gzipIn ->
-                TarArchiveInputStream(gzipIn).use { tarIn ->
-                    while (true) {
-                        val entry: ArchiveEntry = tarIn.nextEntry ?: break
-                        extractOneEntry(destDir, tarIn, entry)
-                    }
-                }
-            }
-        }
+    fun extractTarGzToDirectory(archive: Path, dest: Path) {
+        val stream = Files.newInputStream(archive)
+            .let(::BufferedInputStream)
+            .let(::GzipCompressorInputStream)
+            .let(::TarArchiveInputStream)
+
+        while (true) { extractOneEntry(dest,stream.nextEntry ?: break, stream) }
     }
 
-    private fun extractOneEntry(destDir: Path, tarIn: TarArchiveInputStream, entry: ArchiveEntry) {
-        val rawName = entry.name.trimStart('/').replace('\\', '/')
-        if (rawName.isEmpty()) return
-        val outPath = destDir.resolve(rawName).normalize()
-        if (!outPath.startsWith(destDir.normalize())) {
-            throw IllegalArgumentException("Unsafe path in archive: ${entry.name}")
-        }
+    private fun extractOneEntry(dest: Path, entry: ArchiveEntry, stream: TarArchiveInputStream) {
+        val out = entry.name
+            .trimStart('/')
+            .replace('\\', '/')
+            .takeIf { it.isNotEmpty()  }
+            ?.let { dest.resolve(it).normalize() }
+            ?.takeIf { it.startsWith(dest.normalize()) }
+            ?: return
+
         if (entry.isDirectory) {
-            Files.createDirectories(outPath)
+            Files.createDirectories(out)
         } else {
-            Files.createDirectories(outPath.parent)
-            Files.copy(tarIn, outPath, StandardCopyOption.REPLACE_EXISTING)
+            Files.createDirectories(out.parent)
+            Files.copy(stream, out, StandardCopyOption.REPLACE_EXISTING)
         }
+    }
+
+    private fun archiveEntry(source: Path, path: Path, stream: TarArchiveOutputStream) {
+        val entry = source.relativize(path)
+            .toString()
+            .replace('\\', '/')
+            .let { if (Files.isDirectory(path)) "$it/" else it }
+            .let { TarArchiveEntry(path.toFile(), it) }
+        stream.putArchiveEntry(entry)
+        if (Files.isRegularFile(path)) {
+            Files.copy(path, stream)
+        }
+        stream.closeArchiveEntry()
     }
 }

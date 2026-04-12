@@ -4,6 +4,7 @@ import ru.arheo.feature.report.editor.domian.models.Author
 import ru.arheo.feature.report.editor.domian.models.District
 import ru.arheo.feature.report.editor.domian.models.Keyword
 import ru.arheo.feature.report.editor.domian.models.monument.Monument
+import java.nio.file.Path
 
 internal data class Report(
     val id: ReportId?,
@@ -14,7 +15,7 @@ internal data class Report(
     val districts: List<District>,
     val keywords: List<Keyword>,
     val monuments: List<Monument> = emptyList(),
-    val archiveFilePath: String? = null,
+    val archive: Path? = null,
 ) {
     companion object {
         fun default() = Report(
@@ -26,7 +27,7 @@ internal data class Report(
             districts = emptyList(),
             keywords = emptyList(),
             monuments = emptyList(),
-            archiveFilePath = null,
+            archive = null,
         )
     }
 }

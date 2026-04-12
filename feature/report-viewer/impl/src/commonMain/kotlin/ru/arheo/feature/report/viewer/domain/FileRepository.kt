@@ -1,9 +1,10 @@
 package ru.arheo.feature.report.viewer.domain
 
+import java.nio.file.Path
+
 internal interface FileRepository {
 
-    suspend fun extractArchiveAndOpenInExplorer(
-        archiveFilePath: String?
-    ): Boolean
+    suspend fun createWorkingDirectory(): Path
+    suspend fun extractArchive(working: Path, archive: Path)
 
 }

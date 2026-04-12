@@ -2,7 +2,7 @@
     <string name="main_actions_back">Назад</string>
     <string name="main_actions_open_in_explorer">Открыть материалы</string>
 
-    <string name="main_info_title">Главаня информация</string>
+    <string name="main_info_title">Главная информация</string>
     <string name="main_info_name_field">Название</string>
     <string name="main_info_year_field">Год</string>
     <string name="main_info_authors_field">Авторы</string>

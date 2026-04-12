@@ -4,10 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.arheo.core.domain.model.FileInfoData
 import ru.arheo.core.domain.model.ReportData
-import ru.arheo.core.data.util.AppPaths
 import ru.arheo.core.data.util.TarGzArchive
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 import java.util.Comparator
@@ -15,31 +15,32 @@ import java.util.UUID
 
 internal class DefaultFileSource : FileSource {
 
-    override suspend fun createWorkingDirectory(): String = withContext(Dispatchers.IO) {
-        val dir = AppPaths.resolveTmpDirectory().resolve(UUID.randomUUID().toString())
-        Files.createDirectories(dir)
-        dir.toString()
+    override suspend fun createWorkingDirectory(): Path = withContext(Dispatchers.IO) {
+        val workingDir = Paths.get(WORKING_DIRECTORY_SCOPE_NAME)
+            .resolve(UUID.randomUUID().toString())
+        Files.createDirectories(workingDir)
     }
 
     override suspend fun copyToWorking(
-        workingDir: String,
-        sourcePaths: List<String>,
+        working: Path,
+        sources: List<Path>,
     ): Unit = withContext(Dispatchers.IO) {
-        val targetDir = Path.of(workingDir)
-        sourcePaths.forEach { sourcePath ->
-            val source = Path.of(sourcePath)
-            if (Files.isDirectory(source)) {
-                copyDirectoryRecursive(source, targetDir.resolve(source.fileName))
-            } else {
-                Files.copy(source, targetDir.resolve(source.fileName), StandardCopyOption.REPLACE_EXISTING)
+        sources.forEach { source ->
+            when {
+                Files.isDirectory(source) ->
+                    copyDirectoryRecursive(source, working.resolve(source.fileName))
+                else -> Files.copy(
+                    /* source = */     source,
+                    /* target = */     working.resolve(source.fileName),
+                    /* ...options = */ StandardCopyOption.REPLACE_EXISTING
+                )
             }
         }
     }
 
-    override suspend fun listWorkingFiles(workingDir: String): List<FileInfoData> = withContext(Dispatchers.IO) {
-        val dir = Path.of(workingDir)
-        if (!Files.exists(dir)) return@withContext emptyList()
-        Files.list(dir).use { stream ->
+    override suspend fun listWorkingFiles(working: Path): List<FileInfoData> = withContext(Dispatchers.IO) {
+        if (!Files.exists(working)) return@withContext emptyList()
+        Files.list(working).use { stream ->
             stream
                 .map { path -> buildFileInfo(path) }
                 .toList()
@@ -48,35 +49,41 @@ internal class DefaultFileSource : FileSource {
     }
 
     override suspend fun removeFromWorking(
-        workingDir: String,
+        working: Path,
         fileName: String,
     ): Unit = withContext(Dispatchers.IO) {
-        val path = Path.of(workingDir, fileName)
+        val path = working.resolve(fileName)
         deletePathRecursive(path)
     }
 
     override suspend fun archiveWorkingDirectory(
-        workingDir: String,
+        working: Path,
         archiveName: String,
-    ): String = withContext(Dispatchers.IO) {
-        val archivePath = AppPaths.resolveArchivesDirectory().resolve("$archiveName.tar.gz")
-        TarGzArchive.createTarGzFromDirectoryContents(Path.of(workingDir), archivePath)
-        archivePath.toString()
+    ): Path = withContext(Dispatchers.IO) {
+        val archiveScope = Path.of(ARCHIVES_DIRECTORY_SCOPE_NAME)
+        Files.createDirectories(archiveScope)
+        val archive = archiveScope.resolve("$archiveName.tar.gz")
+        TarGzArchive.createTarGzFromDirectoryContents(working, archive)
+        return@withContext archive
     }
 
     override suspend fun extractArchive(
-        archivePath: String,
-        workingDir: String,
+        archive: Path,
+        working: Path
+    ) = withContext(Dispatchers.IO) {
+        TarGzArchive.extractTarGzToDirectory(archive, working)
+    }
+
+    override suspend fun cleanupWorkingDirectory(
+        working: Path
+    ) = withContext(Dispatchers.IO) {
+        deletePathRecursive(working)
+    }
+
+    override suspend fun deleteArchive(
+        archive: Path
     ): Unit = withContext(Dispatchers.IO) {
-        TarGzArchive.extractTarGzToDirectory(Path.of(archivePath), Path.of(workingDir))
-    }
-
-    override suspend fun cleanupWorkingDirectory(workingDir: String): Unit = withContext(Dispatchers.IO) {
-        deletePathRecursive(Path.of(workingDir))
-    }
-
-    override suspend fun deleteArchive(archivePath: String): Unit = withContext(Dispatchers.IO) {
-        Files.deleteIfExists(Path.of(archivePath))
+        Files.deleteIfExists(archive)
     }
 
     override fun computeArchiveName(report: ReportData): String {
@@ -125,4 +132,8 @@ internal class DefaultFileSource : FileSource {
         }
     }
 
+    private companion object {
+        const val WORKING_DIRECTORY_SCOPE_NAME = "tmp"
+        const val ARCHIVES_DIRECTORY_SCOPE_NAME = "data/archives"
+    }
 }

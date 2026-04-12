@@ -3,37 +3,58 @@ package ru.arheo.feature.report.selector.presentation
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
-import ru.arheo.core.util.getStore
+import ru.arheo.feature.report.selector.presentation.models.UiChooseType
+import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.Transferable
+import java.io.File
+import java.nio.file.Path
+import javax.swing.JFileChooser
 
 internal class DefaultReportSelectorComponent(
     componentContext: ComponentContext,
-    private val reportSelectorStoreFactory: ReportSelectorStoreFactory,
+    private val reportSelectorStoreFactory: ReportSelectorStoreFactory
 ) : ReportSelectorComponent, ComponentContext by componentContext {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    private val chooser by lazy {
+        JFileChooser()
+    }
 
-    private val store: ReportSelectorStore =
-        instanceKeeper.getStore("ReportSelectorStore") {
-            reportSelectorStoreFactory.create()
-        }
+    private val store: ReportSelectorStore by lazy {
+        reportSelectorStoreFactory.create()
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val state: StateFlow<ReportSelectorStore.State> = store.stateFlow
 
     init {
-        lifecycle.subscribe(onDestroy = {
-            coroutineScope.cancel()
-        })
+        lifecycle.subscribe(
+            onDestroy = { store.dispose() }
+        )
     }
 
-    override fun onAttachFiles(paths: List<String>) {
+    override fun onAttachFiles(dialogTitle: String, type: UiChooseType) {
+        val paths = when (type) {
+            UiChooseType.FILE -> pickFiles(dialogTitle)
+            UiChooseType.DIRECTORY -> pickDirectory(dialogTitle)
+        }?.toList() ?: return
+
         store.accept(ReportSelectorStore.Intent.AttachFiles(paths))
+    }
+
+    override fun onDrop(transferable: Transferable): Boolean {
+        if (!transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+            return false
+
+        val paths = transferable.getTransferData(DataFlavor.javaFileListFlavor)
+            .let { it as? List<*> }
+            ?.mapNotNull { item -> item as? File }
+            ?.map { it.toPath() }
+            ?: return false
+
+        store.accept(ReportSelectorStore.Intent.AttachFiles(paths))
+        return true
     }
 
     override fun onRemoveFile(fileName: String) {
@@ -44,7 +65,29 @@ internal class DefaultReportSelectorComponent(
         store.accept(ReportSelectorStore.Intent.UpdateDragOver(isDragging))
     }
 
-    override fun loadArchive(archivePath: String) {
-        store.accept(ReportSelectorStore.Intent.LoadArchive(archivePath))
+    override fun loadArchive(archive: Path) {
+        store.accept(ReportSelectorStore.Intent.LoadArchive(archive))
+    }
+
+    private fun pickFiles(dialogTitle: String): List<Path>? {
+        chooser.apply {
+            isMultiSelectionEnabled = true
+            fileSelectionMode = JFileChooser.FILES_ONLY
+            this.dialogTitle = dialogTitle
+        }
+        return when (chooser.showOpenDialog(null)) {
+            JFileChooser.APPROVE_OPTION -> chooser.selectedFiles.map { it.toPath() }
+            else -> null
+        }
+    }
+
+    private fun pickDirectory(dialogTitle: String): Path? {
+        chooser.apply {
+            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+            this.dialogTitle = dialogTitle
+        }
+        return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            chooser.selectedFile.toPath()
+        } else null
     }
 }

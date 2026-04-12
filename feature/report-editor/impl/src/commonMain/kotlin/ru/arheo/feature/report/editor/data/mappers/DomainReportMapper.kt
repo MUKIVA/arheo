@@ -18,7 +18,7 @@ internal value class DomainReportMapper(
         districts = report.districts.map { it.value },
         keywords = report.keywords.map { it.value },
         monuments = report.monuments.map { it.toData() },
-        archiveFilePath = report.archiveFilePath,
+        archiveFilePath = report.archive.toString(),
     )
 
     private fun Monument.toData(): MonumentData = MonumentData(

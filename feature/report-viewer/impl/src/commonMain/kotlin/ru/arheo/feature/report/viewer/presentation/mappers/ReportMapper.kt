@@ -26,7 +26,7 @@ internal value class ReportMapper(
             keywords = formatList(
                 items = report.keywords.map(Keyword::name)
             ),
-            archiveFilePath = report.archiveFilePath,
+            archive = report.archive,
         )
     }
 }

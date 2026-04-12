@@ -33,7 +33,7 @@ internal class ReportViewerStoreFactory(
         )
     }
 
-    companion object {
+    private companion object {
         const val STORE_NAME = "ReportViewerStore"
     }
 

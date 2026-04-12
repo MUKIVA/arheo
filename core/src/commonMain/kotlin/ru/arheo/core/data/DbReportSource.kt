@@ -1,7 +1,5 @@
 package ru.arheo.core.data
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
@@ -10,7 +8,6 @@ import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import ru.arheo.core.db.MonumentTable
 import ru.arheo.core.db.ReportAuthorTable
@@ -21,11 +18,8 @@ import ru.arheo.core.domain.model.MonumentData
 import ru.arheo.core.domain.model.ReportData
 
 internal class DbReportSource(
-    private val database: Database,
-) : ReportSource {
-    private suspend fun <T> dbQuery(block: () -> T): T =
-        withContext(Dispatchers.IO) { transaction(database) { block() } }
-
+    database: Database,
+) : DbSource(database), ReportSource {
     override suspend fun getAllReports(): List<ReportData> = dbQuery {
         loadAllReports()
     }
@@ -46,7 +40,6 @@ internal class DbReportSource(
             it[title] = report.title
             it[year] = report.year
             it[workType] = report.workType
-            it[reportFilePath] = report.reportFilePath
             it[archiveFilePath] = report.archiveFilePath
         }.value
         insertRelatedData(reportId, report)
@@ -58,7 +51,6 @@ internal class DbReportSource(
             it[title] = report.title
             it[year] = report.year
             it[workType] = report.workType
-            it[reportFilePath] = report.reportFilePath
             it[archiveFilePath] = report.archiveFilePath
         }
         deleteRelatedData(report.id)
@@ -124,7 +116,6 @@ internal class DbReportSource(
             title = row[ReportTable.title],
             year = row[ReportTable.year],
             workType = row[ReportTable.workType],
-            reportFilePath = row[ReportTable.reportFilePath],
             archiveFilePath = row[ReportTable.archiveFilePath],
             authors = loadAuthorsForReport(reportId),
             districts = loadDistrictsForReport(reportId),
@@ -227,9 +218,6 @@ private fun ReportData.matchesSearch(queryLowercase: String): Boolean {
         return true
     }
     if (monuments.any { monument -> monument.matchesSearch(queryLowercase) }) {
-        return true
-    }
-    if (reportFilePath?.lowercase()?.contains(queryLowercase) == true) {
         return true
     }
     if (archiveFilePath?.lowercase()?.contains(queryLowercase) == true) {

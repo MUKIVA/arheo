@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import com.arkivanov.mvikotlin.core.store.Store
 import ru.arheo.feature.report.editor.presentation.models.SaveValidationError
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
+import java.nio.file.Path
 
 internal class ReportEditorStore(
     implementation: Store<Intent, State, Label>
@@ -26,7 +27,7 @@ internal class ReportEditorStore(
         data class UpdateMonument(val index: Int, val monument: UiMonument) : Intent
         data object AddMonument : Intent
         data class RemoveMonument(val index: Int) : Intent
-        data class Save(val workingDirectory: String, val hasFiles: Boolean) : Intent
+        data object Save : Intent
     }
 
     @Stable
@@ -40,6 +41,7 @@ internal class ReportEditorStore(
 
         @Immutable
         data class Content(
+            val woking: Path,
             val reportId: Long? = null,
             val name: String = String(),
             val year: String = String(),
@@ -48,7 +50,7 @@ internal class ReportEditorStore(
             val districts: List<String> = emptyList(),
             val keywords: List<String> = emptyList(),
             val monuments: List<UiMonument> = emptyList(),
-            val archiveFilePath: String? = null,
+            val archive: Path? = null,
             val isSaving: Boolean = false,
         ) : State {
             val isEditing: Boolean get() = reportId != null

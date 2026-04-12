@@ -5,6 +5,10 @@ import kotlinx.coroutines.launch
 import ru.arheo.feature.report.viewer.domain.FileRepository
 import ru.arheo.feature.report.viewer.domain.ReportRepository
 import ru.arheo.feature.report.viewer.domain.models.report.ReportId
+import java.awt.Desktop
+import java.nio.file.Path
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 
 internal class ReportViewerExecutor(
     private val reportId: ReportId,
@@ -49,16 +53,29 @@ internal class ReportViewerExecutor(
     }
 
     private fun handleOpenMaterials() {
-        println("Open material")
         val state = state()
 
         if (state !is ReportViewerStore.State.Content)
             return
 
         scope.launch {
-            fileRepository.extractArchiveAndOpenInExplorer(
-                archiveFilePath = state.report.archiveFilePath
-            )
+            if (state.report.archive == null) {
+                return@launch
+            }
+            val workingDirectory = fileRepository.createWorkingDirectory()
+            fileRepository.extractArchive(workingDirectory, state.report.archive)
+            openDirectoryInSystemExplorer(workingDirectory)
         }
+    }
+
+    private fun openDirectoryInSystemExplorer(working: Path) {
+        if (!working.exists() || !working.isDirectory()) {
+            return
+        }
+
+        return try {
+            if (!Desktop.isDesktopSupported()) { return }
+            Desktop.getDesktop().open(working.toFile())
+        } catch (_: Throwable) {}
     }
 }

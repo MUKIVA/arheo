@@ -4,17 +4,9 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
-import ru.arheo.core.util.getStore
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
 internal class DefaultReportEditorComponent(
@@ -24,34 +16,20 @@ internal class DefaultReportEditorComponent(
     private val navigateBack: () -> Unit
 ) : ReportEditorComponent, ComponentContext by componentContext {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    private val store: ReportEditorStore by lazy {
+        reportEditorStoreFactory.create(reportId)
+    }
 
-    private val store: ReportEditorStore =
-        instanceKeeper.getStore("ReportEditorStore") {
-            reportEditorStoreFactory.create(reportId)
-        }
-
-    private val mutableEvents = MutableSharedFlow<ReportEditorComponent.Event>()
+    init {
+        lifecycle.subscribe(
+            onDestroy = { store.dispose() }
+        )
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val state: StateFlow<ReportEditorStore.State> = store.stateFlow
 
-    override val events: Flow<ReportEditorComponent.Event> = mutableEvents.asSharedFlow()
-
-    init {
-        lifecycle.subscribe(onDestroy = { coroutineScope.cancel() })
-        coroutineScope.launch {
-            @OptIn(ExperimentalCoroutinesApi::class)
-            store.labels.collect { label ->
-                when (label) {
-                    is ReportEditorStore.Label.Saved ->
-                        navigateBack()
-                    is ReportEditorStore.Label.SaveError ->
-                        mutableEvents.emit(ReportEditorComponent.Event.ShowValidationError(label.error))
-                }
-            }
-        }
-    }
+    override val events: Flow<ReportEditorStore.Label> = store.labels
 
     override fun onNameChanged(name: String) {
         store.accept(ReportEditorStore.Intent.UpdateName(name))
@@ -101,11 +79,11 @@ internal class DefaultReportEditorComponent(
         store.accept(ReportEditorStore.Intent.RemoveMonument(index))
     }
 
-    override fun onSave(workingDirectory: String, hasFiles: Boolean) {
-        store.accept(ReportEditorStore.Intent.Save(workingDirectory, hasFiles))
+    override fun onSave() {
+        store.accept(ReportEditorStore.Intent.Save)
     }
 
-    override fun onCancel() {
+    override fun onBack() {
         navigateBack()
     }
 }

@@ -9,6 +9,7 @@ import ru.arheo.feature.report.viewer.domain.models.report.ReportId
 import ru.arheo.feature.report.viewer.domain.models.report.ReportName
 import ru.arheo.feature.report.viewer.domain.models.report.ReportWorkType
 import ru.arheo.feature.report.viewer.domain.models.report.ReportYear
+import java.nio.file.Path
 
 @JvmInline
 internal value class ReportDataMapper(
@@ -27,7 +28,7 @@ internal value class ReportDataMapper(
             monuments = data.monuments.map { monumentData ->
                 DataMapper.from(monumentData).toDomain()
             },
-            archiveFilePath = data.archiveFilePath,
+            archive = data.archiveFilePath?.let { Path.of(it) },
         )
     }
 

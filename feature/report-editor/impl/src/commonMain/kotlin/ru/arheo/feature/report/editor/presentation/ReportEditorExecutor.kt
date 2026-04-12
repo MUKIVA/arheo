@@ -2,8 +2,6 @@ package ru.arheo.feature.report.editor.presentation
 
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
-import ru.arheo.core.domain.model.ReportData
-import ru.arheo.feature.report.editor.data.mappers.DomainReportMapper
 import ru.arheo.feature.report.editor.domian.FileRepository
 import ru.arheo.feature.report.editor.domian.ReportRepository
 import ru.arheo.feature.report.editor.domian.models.Author
@@ -17,19 +15,17 @@ import ru.arheo.feature.report.editor.domian.models.report.ReportWorkType
 import ru.arheo.feature.report.editor.domian.models.report.ReportYear
 import ru.arheo.feature.report.editor.presentation.models.SaveValidationError
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
+import java.nio.file.Files
 
 internal class ReportEditorExecutor(
     private val reportRepository: ReportRepository,
     private val fileRepository: FileRepository
 ) : CoroutineExecutor<ReportEditorStore.Intent, ReportEditorAction, ReportEditorStore.State, ReportEditorPatch, ReportEditorStore.Label>() {
 
-    private var originalArchivePath: String? = null
-
     override fun executeAction(action: ReportEditorAction) {
         when (action) {
             is ReportEditorAction.ReportLoaded -> {
-                originalArchivePath = action.report.archiveFilePath
-                dispatch(ReportEditorPatch.ReportLoaded(action.report))
+                dispatch(ReportEditorPatch.ReportLoaded(action.report, action.working))
             }
             ReportEditorAction.ReportLoadError ->
                 dispatch(ReportEditorPatch.ReportLoadError)
@@ -63,11 +59,11 @@ internal class ReportEditorExecutor(
             is ReportEditorStore.Intent.RemoveMonument ->
                 dispatch(ReportEditorPatch.MonumentRemoved(intent.index))
             is ReportEditorStore.Intent.Save ->
-                handleSave(intent.workingDirectory, intent.hasFiles)
+                handleSave()
         }
     }
 
-    private fun handleSave(workingDirectory: String, hasFiles: Boolean) {
+    private fun handleSave() {
         val content = state() as? ReportEditorStore.State.Content ?: return
         val yearInt = content.year.toIntOrNull()
         if (content.name.isBlank()) {
@@ -82,45 +78,36 @@ internal class ReportEditorExecutor(
             publish(ReportEditorStore.Label.SaveError(SaveValidationError.NO_AUTHORS))
             return
         }
+
         dispatch(ReportEditorPatch.Saving)
+
+
         scope.launch {
             try {
                 val report = buildDomainReport(content, yearInt)
-                val reportData = DomainReportMapper(report).toReportData()
-                val archivePath = archiveIfNeeded(workingDirectory, hasFiles, reportData)
-                val reportWithArchive = report.copy(archiveFilePath = archivePath)
+                val archiveName = fileRepository.computeArchiveName(report)
+
+                val archivePath = when {
+                    Files.walk(content.woking).toList().isNotEmpty() -> fileRepository
+                        .archiveWorkingDirectory(content.woking, archiveName)
+                    else -> null
+                }
+
+                val reportWithArchive = report.copy(archive = archivePath)
                 if (content.isEditing) {
-                    deleteStaleArchive(archivePath)
                     reportRepository.updateReport(reportWithArchive)
                 } else {
                     reportRepository.addReport(reportWithArchive)
                 }
-                if (workingDirectory.isNotEmpty()) {
-                    fileRepository.cleanupWorkingDirectory(workingDirectory)
-                }
-                dispatch(ReportEditorPatch.SaveFinished)
+
+                fileRepository.cleanupWorkingDirectory(content.woking)
+
                 publish(ReportEditorStore.Label.Saved)
             } catch (_: Exception) {
-                dispatch(ReportEditorPatch.SaveFinished)
                 publish(ReportEditorStore.Label.SaveError(SaveValidationError.SAVE_FAILED))
+            } finally {
+                dispatch(ReportEditorPatch.SaveFinished)
             }
-        }
-    }
-
-    private suspend fun archiveIfNeeded(
-        workingDirectory: String,
-        hasFiles: Boolean,
-        report: ReportData,
-    ): String? {
-        if (!hasFiles) return null
-        val archiveName = fileRepository.computeArchiveName(report)
-        return fileRepository.archiveWorkingDirectory(workingDirectory, archiveName)
-    }
-
-    private suspend fun deleteStaleArchive(newArchivePath: String?) {
-        val oldPath = originalArchivePath ?: return
-        if (oldPath != newArchivePath) {
-            fileRepository.deleteArchive(oldPath)
         }
     }
 

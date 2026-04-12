@@ -13,13 +13,17 @@ internal class ReportEditorStoreFactory(
     fun create(reportId: Long?): ReportEditorStore {
         return ReportEditorStore(
             implementation = storeFactory.create(
-                name = "ReportEditorStore",
+                name = STORE_NAME,
                 initialState = ReportEditorStore.State.Loading,
-                bootstrapper = ReportEditorBootstrapper(reportId, reportRepository),
+                bootstrapper = ReportEditorBootstrapper(reportId, reportRepository, fileRepository),
                 executorFactory = { ReportEditorExecutor(reportRepository, fileRepository) },
                 reducer = ReportEditorReducer(),
             )
         )
+    }
+
+    private companion object {
+        const val STORE_NAME = "ReportEditorStore"
     }
 }
 

@@ -5,7 +5,6 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
-import ru.arheo.core.util.getStore
 
 internal class DefaultReportListComponent(
     componentContext: ComponentContext,
@@ -16,9 +15,7 @@ internal class DefaultReportListComponent(
 ) : ReportListComponent, ComponentContext by componentContext {
 
     private val store: ReportListStore by lazy {
-        instanceKeeper.getStore(ReportListStoreFactory.STORE_NAME) {
-            reportListStoreFactory.create()
-        }
+        reportListStoreFactory.create()
     }
 
     @ExperimentalCoroutinesApi
@@ -27,6 +24,7 @@ internal class DefaultReportListComponent(
     init {
         lifecycle.subscribe(
             onResume = { store.accept(ReportListStore.Intent.Refresh) },
+            onDestroy = { store.dispose() }
         )
     }
 

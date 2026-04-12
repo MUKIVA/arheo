@@ -3,12 +3,12 @@
 package ru.arheo.feature.report.selector.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,10 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import arheo.feature.report_selector.impl.generated.resources.Res
@@ -43,56 +39,62 @@ import arheo.feature.report_selector.impl.generated.resources.selector_file_size
 import arheo.feature.report_selector.impl.generated.resources.selector_file_size_mb
 import arheo.feature.report_selector.impl.generated.resources.selector_section_title
 import org.jetbrains.compose.resources.stringResource
+import ru.arheo.feature.report.selector.presentation.ReportSelectorComponent
 import ru.arheo.feature.report.selector.presentation.ReportSelectorStore
+import ru.arheo.feature.report.selector.presentation.models.UiChooseType
 import ru.arheo.feature.report.selector.presentation.models.UiFileInfo
-import javax.swing.JFileChooser
+import java.awt.datatransfer.Transferable
 
 @Composable
 internal fun ReportSelectorContent(
+    component: ReportSelectorComponent,
     state: ReportSelectorStore.State.Content,
     modifier: Modifier = Modifier,
-    onAttachFiles: (List<String>) -> Unit = {},
-    onRemoveFile: (String) -> Unit = {},
-    onDragOver: (Boolean) -> Unit = {},
 ) {
     val fileChooserTitle = stringResource(Res.string.selector_file_chooser_title)
     val directoryChooserTitle = stringResource(Res.string.selector_directory_chooser_title)
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Text(
             text = stringResource(Res.string.selector_section_title),
             style = MaterialTheme.typography.titleMedium,
         )
-        Spacer(modifier = Modifier.height(8.dp))
         FileDropZone(
             isDraggingOver = state.isDraggingOver,
-            onFilesDropped = onAttachFiles,
-            onDragOver = onDragOver,
+            onFilesDropped = component::onDrop,
+            onDragOver = component::onDragOver,
         )
-        Spacer(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
-                onClick = { pickFiles(fileChooserTitle)?.let(onAttachFiles) },
+                onClick = {
+                    component.onAttachFiles(fileChooserTitle, UiChooseType.FILE)
+                },
                 shape = MaterialTheme.shapes.large
             ) {
                 Text(stringResource(Res.string.selector_action_add_files))
             }
             OutlinedButton(
-                onClick = { pickDirectory(directoryChooserTitle)?.let { onAttachFiles(listOf(it)) } },
+                onClick = {
+                    component.onAttachFiles(directoryChooserTitle, UiChooseType.DIRECTORY)
+                },
                 shape = MaterialTheme.shapes.large
             ) {
                 Text(stringResource(Res.string.selector_action_add_directory))
             }
         }
         if (state.attachedFiles.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(Res.string.selector_attached_files_count, state.attachedFiles.size),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(modifier = Modifier.height(4.dp))
             state.attachedFiles.forEach { file ->
-                FileRow(file = file, onRemove = { onRemoveFile(file.name) })
+                FileRow(
+                    file = file,
+                    onRemove = { component.onRemoveFile(file.name) }
+                )
             }
         }
     }
@@ -101,41 +103,35 @@ internal fun ReportSelectorContent(
 @Composable
 private fun FileDropZone(
     isDraggingOver: Boolean,
-    onFilesDropped: (List<String>) -> Unit,
+    onFilesDropped: (Transferable) -> Boolean,
     onDragOver: (Boolean) -> Unit,
 ) {
-    val borderColor = if (isDraggingOver) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
+    val borderColor = when (isDraggingOver) {
+        true -> MaterialTheme.colorScheme.primary
+        false -> MaterialTheme.colorScheme.outlineVariant
     }
-    val backgroundColor = if (isDraggingOver) {
-        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+
+    val backgroundColor = when (isDraggingOver) {
+        true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        false -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     }
+
     val dragAndDropTarget = remember {
         DefaultDragDropTarget(onDragOver, onFilesDropped)
     }
-    val dropZoneText = if (isDraggingOver) {
-        stringResource(Res.string.selector_drop_zone_active)
-    } else {
-        stringResource(Res.string.selector_drop_zone_idle)
+
+    val dropZoneText = when (isDraggingOver) {
+        true -> stringResource(Res.string.selector_drop_zone_active)
+        false -> stringResource(Res.string.selector_drop_zone_idle)
     }
-    val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
             .clip(MaterialTheme.shapes.large)
             .background(backgroundColor)
-            .drawBehind {
-                drawRoundRect(
-                    color = borderColor,
-                    cornerRadius = CornerRadius(16.dp.toPx()),
-                    style = Stroke(width = 2.dp.toPx(), pathEffect = dashPathEffect),
-                )
-            }
+            .border(2.dp, borderColor)
             .dragAndDropTarget(
                 shouldStartDragAndDrop = { true },
                 target = dragAndDropTarget,
@@ -207,25 +203,4 @@ private fun formatFileSize(bytes: Long): String = when {
         stringResource(Res.string.selector_file_size_mb, "%.1f".format(bytes / (1024.0 * 1024.0)))
     else ->
         stringResource(Res.string.selector_file_size_gb, "%.1f".format(bytes / (1024.0 * 1024.0 * 1024.0)))
-}
-
-private fun pickFiles(dialogTitle: String): List<String>? {
-    val chooser = JFileChooser().apply {
-        isMultiSelectionEnabled = true
-        fileSelectionMode = JFileChooser.FILES_ONLY
-        this.dialogTitle = dialogTitle
-    }
-    return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-        chooser.selectedFiles.map { it.absolutePath }
-    } else null
-}
-
-private fun pickDirectory(dialogTitle: String): String? {
-    val chooser = JFileChooser().apply {
-        fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-        this.dialogTitle = dialogTitle
-    }
-    return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-        chooser.selectedFile.absolutePath
-    } else null
 }

@@ -2,7 +2,6 @@ package ru.arheo.feature.report.editor.presentation
 
 import com.arkivanov.mvikotlin.core.store.Reducer
 import ru.arheo.feature.report.editor.domian.models.monument.Monument
-import ru.arheo.feature.report.editor.domian.models.report.Report
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
 
 internal class ReportEditorReducer : Reducer<ReportEditorStore.State, ReportEditorPatch> {
@@ -18,7 +17,18 @@ internal class ReportEditorReducer : Reducer<ReportEditorStore.State, ReportEdit
         state: ReportEditorStore.State.Loading,
         patch: ReportEditorPatch
     ) = when (patch) {
-        is ReportEditorPatch.ReportLoaded -> patch.report.toContentState()
+        is ReportEditorPatch.ReportLoaded -> ReportEditorStore.State.Content(
+            reportId = patch.report.id?.value,
+            name = patch.report.name.value,
+            year = patch.report.year.value.let { if (it == 0) "" else it.toString() },
+            authors = patch.report.authors.map { it.value },
+            workType = patch.report.workType.value,
+            districts = patch.report.districts.map { it.value },
+            keywords = patch.report.keywords.map { it.value },
+            monuments = patch.report.monuments.map { it.toUi() },
+            archive = patch.report.archive,
+            woking = patch.working
+        )
         is ReportEditorPatch.ReportLoadError -> ReportEditorStore.State.Error
         else -> state
     }
@@ -72,19 +82,6 @@ internal class ReportEditorReducer : Reducer<ReportEditorStore.State, ReportEdit
     ) = when (patch) {
         else -> state
     }
-
-    private fun Report.toContentState(): ReportEditorStore.State.Content =
-        ReportEditorStore.State.Content(
-            reportId = id?.value,
-            name = name.value,
-            year = year.value.let { if (it == 0) "" else it.toString() },
-            authors = authors.map { it.value },
-            workType = workType.value,
-            districts = districts.map { it.value },
-            keywords = keywords.map { it.value },
-            monuments = monuments.map { it.toUi() },
-            archiveFilePath = archiveFilePath,
-        )
 
     private fun Monument.toUi(): UiMonument = UiMonument(
         id = id,

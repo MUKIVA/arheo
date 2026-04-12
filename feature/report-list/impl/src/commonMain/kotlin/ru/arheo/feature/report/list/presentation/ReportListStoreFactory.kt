@@ -20,7 +20,7 @@ internal class ReportListStoreFactory(
         )
     }
 
-    companion object {
+    private companion object {
         const val STORE_NAME = "ReportListStore"
     }
 }

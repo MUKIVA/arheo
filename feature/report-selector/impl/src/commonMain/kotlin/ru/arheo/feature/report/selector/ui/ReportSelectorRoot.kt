@@ -19,11 +19,9 @@ internal fun ReportSelectorRoot(
             ReportSelectorLoading(modifier)
         is ReportSelectorStore.State.Content ->
             ReportSelectorContent(
-                state         = instance,
-                modifier      = modifier,
-                onAttachFiles = component::onAttachFiles,
-                onRemoveFile  = component::onRemoveFile,
-                onDragOver    = component::onDragOver,
+                component = component,
+                state     = instance,
+                modifier  = modifier
             )
     }
 }

@@ -19,7 +19,7 @@ internal class ReportSelectorReducer : Reducer<ReportSelectorStore.State, Report
         patch: ReportSelectorPatch
     ): ReportSelectorStore.State = when (patch) {
         is ReportSelectorPatch.WorkingDirectorySet ->
-            ReportSelectorStore.State.Content(workingDirectory = patch.path)
+            ReportSelectorStore.State.Content()
         else -> state
     }
 
@@ -27,14 +27,13 @@ internal class ReportSelectorReducer : Reducer<ReportSelectorStore.State, Report
         state: ReportSelectorStore.State.Content,
         patch: ReportSelectorPatch
     ): ReportSelectorStore.State = when (patch) {
-        is ReportSelectorPatch.WorkingDirectorySet ->
-            state.copy(workingDirectory = patch.path)
         is ReportSelectorPatch.FilesUpdated ->
             state.copy(attachedFiles = patch.files.asUiFileInfoList())
         is ReportSelectorPatch.DragOverChanged ->
             state.copy(isDraggingOver = patch.isDragging)
         is ReportSelectorPatch.ShowLoading ->
             ReportSelectorStore.State.Loading
+        else -> state
     }
 }
 

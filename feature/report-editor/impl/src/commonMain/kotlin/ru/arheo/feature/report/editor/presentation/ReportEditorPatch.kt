@@ -2,9 +2,10 @@ package ru.arheo.feature.report.editor.presentation
 
 import ru.arheo.feature.report.editor.domian.models.report.Report
 import ru.arheo.feature.report.editor.presentation.models.UiMonument
+import java.nio.file.Path
 
 internal sealed interface ReportEditorPatch {
-    data class ReportLoaded(val report: Report) : ReportEditorPatch
+    data class ReportLoaded(val report: Report, val working: Path) : ReportEditorPatch
     data object ReportLoadError : ReportEditorPatch
     data class NameChanged(val name: String) : ReportEditorPatch
     data class YearChanged(val year: String) : ReportEditorPatch

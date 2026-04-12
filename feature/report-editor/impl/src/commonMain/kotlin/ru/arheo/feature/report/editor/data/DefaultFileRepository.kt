@@ -1,27 +1,28 @@
 package ru.arheo.feature.report.editor.data
 
 import ru.arheo.core.data.FileSource
-import ru.arheo.core.domain.model.ReportData
+import ru.arheo.feature.report.editor.data.mappers.Mapper
 import ru.arheo.feature.report.editor.domian.FileRepository
+import ru.arheo.feature.report.editor.domian.models.report.Report
+import java.nio.file.Path
 
 internal class DefaultFileRepository(
     private val source: FileSource
 ) : FileRepository {
-
+    override suspend fun createWorkingDirectory(): Path {
+        return source.createWorkingDirectory()
+    }
     override suspend fun archiveWorkingDirectory(
-        workingDir: String,
+        working: Path,
         archiveName: String
-    ): String = source.archiveWorkingDirectory(workingDir, archiveName)
-
+    ) = source.archiveWorkingDirectory(working, archiveName)
     override suspend fun cleanupWorkingDirectory(
-        workingDir: String
-    ) = source.cleanupWorkingDirectory(workingDir)
-
+        working: Path
+    ) = source.cleanupWorkingDirectory(working)
     override suspend fun deleteArchive(
-        archivePath: String
-    ) = source.deleteArchive(archivePath)
-
+        archive: Path
+    ) = source.deleteArchive(archive)
     override fun computeArchiveName(
-        report: ReportData
-    ): String = source.computeArchiveName(report)
+        report: Report
+    ): String = source.computeArchiveName(Mapper.from(report).toReportData())
 }
