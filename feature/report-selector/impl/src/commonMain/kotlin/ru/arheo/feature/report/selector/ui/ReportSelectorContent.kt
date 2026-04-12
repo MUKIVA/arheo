@@ -131,7 +131,7 @@ private fun FileDropZone(
             .height(80.dp)
             .clip(MaterialTheme.shapes.large)
             .background(backgroundColor)
-            .border(2.dp, borderColor)
+            .border(2.dp, borderColor, MaterialTheme.shapes.large)
             .dragAndDropTarget(
                 shouldStartDragAndDrop = { true },
                 target = dragAndDropTarget,
