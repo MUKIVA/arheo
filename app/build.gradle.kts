@@ -74,7 +74,12 @@ compose.desktop {
             packageVersion = internalVersion
             description = "Управление археологическими отчётами"
             vendor = "Arheo"
-            includeAllModules = true
+            includeAllModules = false
+            modules(
+                "java.instrument",
+                "java.sql",
+                "jdk.unsupported",
+            )
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
             linux {
