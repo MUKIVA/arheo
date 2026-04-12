@@ -100,8 +100,6 @@ internal class ReportEditorExecutor(
                     reportRepository.addReport(reportWithArchive)
                 }
 
-                fileRepository.cleanupWorkingDirectory(content.woking)
-
                 publish(ReportEditorStore.Label.Saved)
             } catch (_: Exception) {
                 publish(ReportEditorStore.Label.SaveError(SaveValidationError.SAVE_FAILED))

@@ -6,5 +6,6 @@ internal interface FileRepository {
 
     suspend fun createWorkingDirectory(): Path
     suspend fun extractArchive(working: Path, archive: Path)
+    suspend fun cleanupWorkingDirectory(working: Path)
 
 }

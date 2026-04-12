@@ -2,6 +2,7 @@ package ru.arheo.feature.report.viewer.presentation
 
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import ru.arheo.feature.report.viewer.domain.FileRepository
 import ru.arheo.feature.report.viewer.domain.ReportRepository
 import ru.arheo.feature.report.viewer.domain.models.report.ReportId
@@ -22,6 +23,8 @@ internal class ReportViewerExecutor(
     ReportViewerStore.Label
 >() {
 
+    private val pathsForClean = mutableListOf<Path>()
+
     override fun executeAction(action: ReportViewerAction) {
         when (action) {
             is ReportViewerAction.ReportLoaded ->
@@ -40,6 +43,13 @@ internal class ReportViewerExecutor(
             ReportViewerStore.Intent.Refresh -> handleRefresh()
             ReportViewerStore.Intent.OpenMaterials -> handleOpenMaterials()
         }
+    }
+
+    override fun dispose() = runBlocking {
+        pathsForClean.onEach { path ->
+            fileRepository.cleanupWorkingDirectory(path)
+        }
+        super.dispose()
     }
 
     private fun handleRefresh() {
@@ -62,7 +72,9 @@ internal class ReportViewerExecutor(
             if (state.report.archive == null) {
                 return@launch
             }
-            val workingDirectory = fileRepository.createWorkingDirectory()
+            val workingDirectory = fileRepository.createWorkingDirectory().apply {
+                pathsForClean.add(this)
+            }
             fileRepository.extractArchive(workingDirectory, state.report.archive)
             openDirectoryInSystemExplorer(workingDirectory)
         }

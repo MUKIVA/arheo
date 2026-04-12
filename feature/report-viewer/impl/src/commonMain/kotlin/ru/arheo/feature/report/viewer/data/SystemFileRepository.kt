@@ -17,4 +17,8 @@ internal class SystemFileRepository(
         source.extractArchive(archive, working)
     }
 
+    override suspend fun cleanupWorkingDirectory(working: Path) {
+        source.cleanupWorkingDirectory(working)
+    }
+
 }
