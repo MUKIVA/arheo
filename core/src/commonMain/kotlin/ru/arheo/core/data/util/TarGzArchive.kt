@@ -26,6 +26,7 @@ internal object TarGzArchive {
                 .sorted()
                 .forEach { path -> archiveEntry(source, path, stream) }
         }
+        stream.close()
     }
 
     fun extractTarGzToDirectory(archive: Path, dest: Path) {
@@ -35,6 +36,7 @@ internal object TarGzArchive {
             .let(::TarArchiveInputStream)
 
         while (true) { extractOneEntry(dest,stream.nextEntry ?: break, stream) }
+        stream.close()
     }
 
     private fun extractOneEntry(dest: Path, entry: ArchiveEntry, stream: TarArchiveInputStream) {
