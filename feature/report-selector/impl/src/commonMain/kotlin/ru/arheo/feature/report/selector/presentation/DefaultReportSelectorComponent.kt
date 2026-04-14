@@ -35,11 +35,13 @@ internal class DefaultReportSelectorComponent(
     }
 
     override fun onAttachFiles(dialogTitle: String, type: UiChooseType) {
-        val paths = when (type) {
-            UiChooseType.FILE -> pickFiles(dialogTitle)
-            UiChooseType.DIRECTORY -> pickDirectory(dialogTitle)
-        }?.toList() ?: return
-
+        val paths: List<Path> = when (type) {
+            UiChooseType.FILE -> pickFiles(dialogTitle) ?: return
+            UiChooseType.DIRECTORY -> {
+                val directory: Path = pickDirectory(dialogTitle) ?: return
+                listOf(directory)
+            }
+        }
         store.accept(ReportSelectorStore.Intent.AttachFiles(paths))
     }
 

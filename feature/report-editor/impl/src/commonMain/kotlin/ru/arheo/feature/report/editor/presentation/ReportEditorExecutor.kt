@@ -81,7 +81,6 @@ internal class ReportEditorExecutor(
 
         dispatch(ReportEditorPatch.Saving)
 
-
         scope.launch {
             try {
                 val report = buildDomainReport(content, yearInt)
@@ -105,7 +104,7 @@ internal class ReportEditorExecutor(
                 }
 
                 publish(ReportEditorStore.Label.Saved)
-            } catch (_: Exception) {
+            } catch (cause: Throwable) {
                 publish(ReportEditorStore.Label.SaveError(SaveValidationError.SAVE_FAILED))
             } finally {
                 dispatch(ReportEditorPatch.SaveFinished)
