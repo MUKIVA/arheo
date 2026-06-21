@@ -58,34 +58,49 @@ internal class ReportEditorExecutor(
                 dispatch(ReportEditorPatch.MonumentAdded)
             is ReportEditorStore.Intent.RemoveMonument ->
                 dispatch(ReportEditorPatch.MonumentRemoved(intent.index))
-            is ReportEditorStore.Intent.Save ->
+            is ReportEditorStore.Intent.Save -> {
+                println("ReportEditorExecutor Save Intent start")
                 handleSave()
+                println("ReportEditorExecutor Save Intent end")
+            }
         }
     }
 
     private fun handleSave() {
+        println("handleSave start")
         val content = state() as? ReportEditorStore.State.Content ?: return
+        println("handleSave getState successful")
         val yearInt = content.year.toIntOrNull()
+        println("handleSave get year int")
         if (content.name.isBlank()) {
             publish(ReportEditorStore.Label.SaveError(SaveValidationError.EMPTY_TITLE))
             return
         }
+        println("handleSave name ok")
         if (yearInt == null) {
             publish(ReportEditorStore.Label.SaveError(SaveValidationError.INVALID_YEAR))
             return
         }
+        println("handleSave year ok")
         if (content.authors.isEmpty()) {
             publish(ReportEditorStore.Label.SaveError(SaveValidationError.NO_AUTHORS))
             return
         }
+        println("handleSave authors is not empty")
 
+        println("handleSave dispatch saving")
         dispatch(ReportEditorPatch.Saving)
+        println("handleSave dispatch saving ok")
 
+        println("handleSave start coroutine")
         scope.launch {
             try {
+                println("handleSave buildDomainReport")
                 val report = buildDomainReport(content, yearInt)
+                println("handleSave get archive name")
                 val archiveName = fileRepository.computeArchiveName(report)
 
+                println("handleSave get full patch")
                 val archivePath = when {
                     Files.walk(content.woking).toList().isNotEmpty() -> {
                         if (content.archive != null) {
@@ -96,15 +111,21 @@ internal class ReportEditorExecutor(
                     else -> null
                 }
 
+                println("handleSave update report")
                 val reportWithArchive = report.copy(archive = archivePath)
                 if (content.isEditing) {
                     reportRepository.updateReport(reportWithArchive)
                 } else {
                     reportRepository.addReport(reportWithArchive)
                 }
+                println("handleSave update report ok")
 
+                println("handleSave Saved")
                 publish(ReportEditorStore.Label.Saved)
+                println("handleSave Saved ok")
             } catch (cause: Throwable) {
+                println("handleSave error: ${cause.message}")
+                cause.printStackTrace()
                 publish(ReportEditorStore.Label.SaveError(SaveValidationError.SAVE_FAILED))
             } finally {
                 dispatch(ReportEditorPatch.SaveFinished)

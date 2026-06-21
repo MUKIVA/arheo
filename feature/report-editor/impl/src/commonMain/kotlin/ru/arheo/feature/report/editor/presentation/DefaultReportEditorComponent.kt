@@ -80,7 +80,9 @@ internal class DefaultReportEditorComponent(
     }
 
     override fun onSave() {
+        println("DefaultReportEditorComponent: onSave start")
         store.accept(ReportEditorStore.Intent.Save)
+        println("DefaultReportEditorComponent: onSave end")
     }
 
     override fun onBack() {
